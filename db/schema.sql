@@ -6,9 +6,10 @@ CREATE TABLE IF NOT EXISTS produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     descricao TEXT,
-    categoria VARCHAR(100) NOT NULL,
     preco DECIMAL(10, 2) NOT NULL,
-    imagem VARCHAR(255)
+    imagem VARCHAR(255),
+    categoria VARCHAR(100) NOT NULL,
+    estoque INT NOT NULL DEFAULT 0
 );
 
 -- 3. Insere itens de exemplo na tabela
