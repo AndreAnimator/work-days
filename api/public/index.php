@@ -8,8 +8,13 @@ use App\Controllers\CartController;
 use App\Core\Request;
 use App\Core\Router;
 use App\Middleware\Authenticate;
+use App\Middleware\Cors;
+
+Cors::apply();
+
 
 $router = new Router();
+
 
 // Público
 $router->post('/api/auth/register', [AuthController::class, 'register']);
