@@ -1,17 +1,20 @@
 <?php
-require_once __DIR__ . '/../config/database.php';
 
-function getAllProducts(): array {
-    global $pdo;
+class Product
+{
+    private PDO $db;
 
-    $sql = "SELECT id,
-                   nome AS name,
-                   descricao AS description,
-                   preco AS price,
-                   imagem AS image,
-                   categoria AS category,
-                   estoque AS stock
-            FROM produtos";
+    public function __construct(PDO $db)
+    {
+        $this->db = $db;
+    }
 
-    return $pdo->query($sql)->fetchAll();
+    public function getAll(): array
+    {
+        $sql = "SELECT * FROM produtos ORDER BY id DESC";
+
+        $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll();
+    }
 }
