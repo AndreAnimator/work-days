@@ -8,9 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet">
   
-  <!-- CSS global e do perfil -->
+  <!-- CSS global, do perfil e do modal -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="perfil.css">
+  <link rel="stylesheet" href="login.css">
 </head>
 <body>
 
@@ -31,7 +32,7 @@
       <a href="#">Ofertas</a>
     </nav>
 
-    <form class="search" role="search">
+    <form class="search" role="search" id="search-form">
       <input type="search" id="busca" placeholder="Buscar produtos..." aria-label="Buscar produtos">
       <button type="submit" aria-label="Buscar">&#9906;</button>
     </form>
@@ -140,6 +141,66 @@
   </div>
 </main>
 
+<!-- Modal de Autenticação (Login / Cadastro) -->
+<div id="auth-modal" class="auth-modal hidden" aria-hidden="true">
+  <div id="auth-overlay" class="auth-overlay"></div>
+  <div class="auth-content login-card">
+    <button id="close-auth-btn" class="auth-close" aria-label="Fechar">&times;</button>
+    
+    <div class="login-header">
+      <div class="login-icon">龍</div>
+      <h2>Billiard Dinasty</h2>
+      <p>Acesse sua conta para gerenciar seus pedidos</p>
+    </div>
+
+    <div class="auth-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #ddd;">
+      <button id="tab-login" class="tab-btn active" style="padding: 0.5rem 1rem; background: none; border: none; border-bottom: 2px solid #d4af37; font-weight: bold; cursor: pointer;">Entrar</button>
+      <button id="tab-register" class="tab-btn" style="padding: 0.5rem 1rem; background: none; border: none; cursor: pointer;">Cadastrar</button>
+    </div>
+
+    <!-- Mensagens de Alerta -->
+    <div id="login-message" class="login-alert error" style="display: none;"></div>
+    <div id="register-message" class="login-alert error" style="display: none;"></div>
+
+    <!-- Formulário de Login -->
+    <form id="login-form" class="login-form">
+      <div class="form-group">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" required placeholder="seuemail@exemplo.com">
+      </div>
+      <div class="form-group">
+        <div class="label-row">
+          <label for="login-password">Senha</label>
+          <a href="#" class="link-forgot">Esqueceu?</a>
+        </div>
+        <input type="password" id="login-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-login">Entrar</button>
+    </form>
+
+    <!-- Formulário de Cadastro -->
+    <form id="register-form" class="login-form hidden">
+      <div class="form-group">
+        <label for="register-name">Nome Completo</label>
+        <input type="text" id="register-name" required placeholder="Seu nome completo">
+      </div>
+      <div class="form-group">
+        <label for="register-email">E-mail</label>
+        <input type="email" id="register-email" required placeholder="seuemail@exemplo.com">
+      </div>
+      <div class="form-group">
+        <label for="register-password">Senha</label>
+        <input type="password" id="register-password" required placeholder="Mínimo 8 caracteres">
+      </div>
+      <div class="form-group">
+        <label for="register-password-confirmation">Confirmar Senha</label>
+        <input type="password" id="register-password-confirmation" required placeholder="Repita sua senha">
+      </div>
+      <button type="submit" class="btn-login">Cadastrar</button>
+    </form>
+  </div>
+</div>
+
 <footer class="beneficios">
   <div class="container beneficios__inner">
     <div class="beneficio"><span class="beneficio__icon" aria-hidden="true">&#128666;</span><div><strong>Frete Grátis</strong><small>em compras acima de R$ 299,90</small></div></div>
@@ -149,6 +210,8 @@
   </div>
 </footer>
 
+<!-- Scripts na ordem correta de dependência -->
+<script src="script.js"></script>
 <script src="perfil.js"></script>
 </body>
 </html>

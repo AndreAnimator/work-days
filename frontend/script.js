@@ -1,9 +1,10 @@
-const API_URL = 'http://localhost:8000/api/auth';
+// URL base do seu servidor PHP (Ajuste a porta ou subpasta se necessário)
+const API_URL = 'http://localhost:8000';
 
+// Seleção de elementos do DOM
 const authModal = document.getElementById('auth-modal');
 const authOverlay = document.getElementById('auth-overlay');
 const closeAuthBtn = document.getElementById('close-auth-btn');
-const accountBtn = document.getElementById('account-btn');
 
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
@@ -14,12 +15,12 @@ const tabRegister = document.getElementById('tab-register');
 const loginMessage = document.getElementById('login-message');
 const registerMessage = document.getElementById('register-message');
 
-const searchForm = document.getElementById('search-form');
-
+// Função auxiliar para exibir mensagens de erro/sucesso
 function showMessage(element, message, type = 'error') {
   if (!element) return;
   element.textContent = message;
-  element.className = `auth-message ${type}`;
+  element.className = `login-alert ${type}`;
+  element.style.display = message ? 'block' : 'none';
 }
 
 function clearMessages() {
@@ -27,134 +28,69 @@ function clearMessages() {
   showMessage(registerMessage, '');
 }
 
-function setButtonLoading(button, loading, loadingText, normalText) {
-  if (!button) return;
-  button.disabled = loading;
-  button.textContent = loading ? loadingText : normalText;
-}
-
+// Controle de Abertura/Fechamento do Modal
 function openAuthModal() {
   if (!authModal) return;
-
   authModal.classList.remove('hidden');
   authModal.setAttribute('aria-hidden', 'false');
-
   showLogin();
-
-  setTimeout(() => {
-    document.getElementById('login-email')?.focus();
-  }, 50);
 }
 
 function closeAuthModal() {
   if (!authModal) return;
-
   authModal.classList.add('hidden');
   authModal.setAttribute('aria-hidden', 'true');
-
   clearMessages();
 }
 
-if (accountBtn) {
-  accountBtn.addEventListener('click', (event) => {
-    event.preventDefault();
-    openAuthModal();
+// EVITA QUE CLIQUES DENTRO DO FORMULÁRIO FECHEM O MODAL
+const authContent = document.querySelector('.auth-content');
+if (authContent) {
+  authContent.addEventListener('click', (event) => {
+    event.stopPropagation();
   });
 }
 
-if (closeAuthBtn) {
-  closeAuthBtn.addEventListener('click', closeAuthModal);
-}
-
-if (authOverlay) {
-  authOverlay.addEventListener('click', closeAuthModal);
-}
+// Eventos de fechar o modal
+if (closeAuthBtn) closeAuthBtn.addEventListener('click', closeAuthModal);
+if (authOverlay) authOverlay.addEventListener('click', closeAuthModal);
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    closeAuthModal();
-  }
+  if (event.key === 'Escape') closeAuthModal();
 });
 
+// Alternância entre as abas Entrar / Cadastrar
 function showLogin() {
   loginForm?.classList.remove('hidden');
   registerForm?.classList.add('hidden');
-
   tabLogin?.classList.add('active');
   tabRegister?.classList.remove('active');
-
   clearMessages();
 }
 
 function showRegister() {
   loginForm?.classList.add('hidden');
   registerForm?.classList.remove('hidden');
-
   tabLogin?.classList.remove('active');
   tabRegister?.classList.add('active');
-
   clearMessages();
-
-  setTimeout(() => {
-    document.getElementById('register-name')?.focus();
-  }, 50);
 }
 
 tabLogin?.addEventListener('click', showLogin);
 tabRegister?.addEventListener('click', showRegister);
 
-async function parseResponse(response) {
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('application/json')) {
-    return await response.json();
-  }
-
-  const text = await response.text();
-
-  return {
-    message: text || 'Resposta inválida do servidor.'
-  };
-}
-
-function getApiErrorMessage(data) {
-  if (!data) {
-    return 'Ocorreu um erro inesperado.';
-  }
-
-  if (data.message) {
-    return data.message;
-  }
-
-  if (data.errors) {
-    const errors = data.errors;
-    return Object.values(errors).flat().join(' ');
-  }
-
-  return 'Não foi possível concluir a operação.';
-}
-
-loginForm?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
+// ==========================================
+// SUBMIT DO FORMULÁRIO DE LOGIN
+// ==========================================
+loginForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
   clearMessages();
 
-  const emailInput = document.getElementById('login-email');
-  const passwordInput = document.getElementById('login-password');
-  const submitButton = loginForm.querySelector('button[type="submit"]');
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-
-  if (!email || !password) {
-    showMessage(loginMessage, 'Preencha o e-mail e a senha.');
-    return;
-  }
-
-  setButtonLoading(submitButton, true, 'Entrando...', 'Entrar');
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
 
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -163,88 +99,48 @@ loginForm?.addEventListener('submit', async (event) => {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await parseResponse(response);
+    const data = await response.json();
 
     if (!response.ok) {
-      showMessage(loginMessage, getApiErrorMessage(data));
+      showMessage(loginMessage, data.message || 'E-mail ou senha inválidos.');
       return;
     }
 
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
+    if (data.token) localStorage.setItem('token', data.token);
+    if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
 
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
+    showMessage(loginMessage, 'Login realizado! Carregando...', 'success');
 
-    if (data.expires_at) {
-      localStorage.setItem('token_expires_at', data.expires_at);
-    }
-
-    showMessage(loginMessage, 'Login realizado com sucesso!', 'success');
-
+    // Recarrega a página para atualizar o estado da conta
     setTimeout(() => {
-      closeAuthModal();
-    }, 500);
+      window.location.reload();
+    }, 600);
 
-  } catch (error) {
-    console.error('Erro ao realizar login:', error);
-    showMessage(
-      loginMessage,
-      'Não foi possível conectar ao servidor. Verifique se a API está funcionando.'
-    );
-  } finally {
-    setButtonLoading(submitButton, false, 'Entrando...', 'Entrar');
+  } catch (err) {
+    console.error('Erro no login:', err);
+    showMessage(loginMessage, 'Erro de conexão com o servidor PHP.');
   }
 });
 
-registerForm?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
+// ==========================================
+// SUBMIT DO FORMULÁRIO DE CADASTRO
+// ==========================================
+registerForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
   clearMessages();
 
-  const nameInput = document.getElementById('register-name');
-  const emailInput = document.getElementById('register-email');
-  const passwordInput = document.getElementById('register-password');
-  const confirmationInput = document.getElementById('register-password-confirmation');
-
-  const submitButton = registerForm.querySelector('button[type="submit"]');
-
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-  const passwordConfirmation = confirmationInput.value;
-
-  // Validações do frontend
-  if (name.length < 3) {
-    showMessage(registerMessage, 'O nome deve possuir pelo menos 3 caracteres.');
-    nameInput.focus();
-    return;
-  }
-
-  if (!email) {
-    showMessage(registerMessage, 'Informe um e-mail válido.');
-    emailInput.focus();
-    return;
-  }
-
-  if (password.length < 8) {
-    showMessage(registerMessage, 'A senha deve possuir pelo menos 8 caracteres.');
-    passwordInput.focus();
-    return;
-  }
+  const name = document.getElementById('register-name').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value;
+  const passwordConfirmation = document.getElementById('register-password-confirmation').value;
 
   if (password !== passwordConfirmation) {
-    showMessage(registerMessage, 'As senhas não são iguais.');
-    confirmationInput.focus();
+    showMessage(registerMessage, 'As senhas não coincidem.');
     return;
   }
 
-  setButtonLoading(submitButton, true, 'Cadastrando...', 'Cadastrar');
-
   try {
-    const response = await fetch(`${API_URL}/register`, {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -258,123 +154,51 @@ registerForm?.addEventListener('submit', async (event) => {
       })
     });
 
-    const data = await parseResponse(response);
+    const data = await response.json();
 
     if (!response.ok) {
-      showMessage(registerMessage, getApiErrorMessage(data));
+      showMessage(registerMessage, data.message || 'Erro ao realizar cadastro.');
       return;
     }
 
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
+    if (data.token) localStorage.setItem('token', data.token);
+    if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
 
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
+    showMessage(registerMessage, 'Cadastro realizado! Entrando...', 'success');
 
-    if (data.expires_at) {
-      localStorage.setItem('token_expires_at', data.expires_at);
-    }
-
-    showMessage(registerMessage, 'Cadastro realizado com sucesso!', 'success');
-
-    // Depois do cadastro, abre a aba de login.
-    // Como a API já devolveu token, o usuário também permanece autenticado.
+    // Recarrega a página após cadastrar
     setTimeout(() => {
-      showLogin();
-      loginForm.reset();
+      window.location.reload();
+    }, 600);
 
-      if (emailInput.value) {
-        document.getElementById('login-email').value = emailInput.value;
-      }
-    }, 700);
-
-  } catch (error) {
-    console.error('Erro ao realizar cadastro:', error);
-    showMessage(
-      registerMessage,
-      'Não foi possível conectar ao servidor. Verifique se a API está funcionando.'
-    );
-  } finally {
-    setButtonLoading(submitButton, false, 'Cadastrando...', 'Cadastrar');
+  } catch (err) {
+    console.error('Erro no cadastro:', err);
+    showMessage(registerMessage, 'Erro de conexão com o servidor PHP.');
   }
 });
 
+// Função global de logout
 async function logout() {
   const token = localStorage.getItem('token');
 
-  if (!token) return;
-
-  try {
-    await fetch(`${API_URL}/logout`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-  } catch (error) {
-    console.error('Erro ao encerrar sessão:', error);
-  } finally {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('token_expires_at');
+  if (token) {
+    try {
+      await fetch(`${API_URL}/logout.php`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch (err) {
+      console.error('Erro ao encerrar sessão no servidor:', err);
+    }
   }
+
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
 }
 
+// EXPOSIÇÃO GLOBAL DE FUNÇÕES PARA OUTROS SCRIPTS (COMO PERFIL.JS)
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
 window.logout = logout;
-
-async function checkAuth() {
-  const token = localStorage.getItem('token');
-
-  if (!token) return null;
-
-  try {
-    const response = await fetch(`${API_URL}/me`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token_expires_at');
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    return data.user || null;
-  } catch (error) {
-    console.error('Não foi possível verificar a sessão:', error);
-    return null;
-  }
-}
-
-searchForm?.addEventListener('submit', (event) => {
-  event.preventDefault();
-
-  const searchInput = document.getElementById('busca');
-  const term = searchInput.value.trim();
-
-  if (!term) return;
-
-  console.log('Busca:', term);
-
-});
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const user = await checkAuth();
-
-  if (user) {
-    console.log(`Usuário autenticado: ${user.name}`);
-  }
-});
