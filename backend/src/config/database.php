@@ -1,12 +1,11 @@
 <?php
 
-$host = 'localhost';
+$host = '127.0.0.1';
 $dbname = 'Ecommerce';
 $username = 'user';
 $password = 'code';
 
 try {
-    // usando PDO ja que o MySQL está no Docker
     $pdo = new PDO(
         "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
         $username,
