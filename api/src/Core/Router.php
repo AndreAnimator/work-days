@@ -3,7 +3,7 @@ namespace App\Core;
 
 final class Router
 {
-    /** @var array<int, array{method:string,path:string,handler:array,middleware:array}> */
+    /* @var array<int, array{method:string,path:string,handler:array,middleware:array}> */
     private array $routes = [];
 
     public function get(string $path, array $handler, array $middleware = []): void

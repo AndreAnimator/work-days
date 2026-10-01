@@ -6,16 +6,7 @@ use PDO;
 
 final class CartRepository
 {
-    public function findByToken(string $token, ?PDO $pdo = null): ?array
-    {
-        $pdo ??= Database::connection();
-        $stmt = $pdo->prepare(
-            'SELECT * FROM carts WHERE token = :token AND user_id IS NULL LIMIT 1'
-        );
-        $stmt->execute(['token' => $token]);
-        return $stmt->fetch() ?: null;
-    }
-
+    /** Devolve o carrinho do usuário, criando se ainda não existir. */
     public function findOrCreateForUser(int $userId, ?PDO $pdo = null): array
     {
         $pdo ??= Database::connection();
@@ -26,11 +17,15 @@ final class CartRepository
         if ($cart) return $cart;
 
         $stmt = $pdo->prepare(
-            'INSERT INTO carts (user_id, token, created_at, updated_at)
-             VALUES (:uid, NULL, NOW(), NOW())
-             RETURNING *'
+            'INSERT INTO carts (user_id, created_at, updated_at)
+             VALUES (:uid, NOW(), NOW())'
         );
         $stmt->execute(['uid' => $userId]);
+
+        $id = (int) $pdo->lastInsertId();
+
+        $stmt = $pdo->prepare('SELECT * FROM carts WHERE id = :id');
+        $stmt->execute(['id' => $id]);
         return $stmt->fetch();
     }
 
@@ -60,10 +55,13 @@ final class CartRepository
         $stmt = $pdo->prepare(
             'INSERT INTO cart_items (cart_id, product_id, quantity)
              VALUES (:cid, :pid, :qty)
-             ON CONFLICT (cart_id, product_id)
-             DO UPDATE SET quantity = EXCLUDED.quantity'
+             ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)'
         );
-        $stmt->execute(['cid' => $cartId, 'pid' => $productId, 'qty' => $quantity]);
+        $stmt->execute([
+            'cid' => $cartId,
+            'pid' => $productId,
+            'qty' => $quantity,
+        ]);
     }
 
     public function deleteItem(int $cartId, int $productId, ?PDO $pdo = null): void
@@ -75,16 +73,19 @@ final class CartRepository
         $stmt->execute(['cid' => $cartId, 'pid' => $productId]);
     }
 
-    public function destroy(int $cartId, ?PDO $pdo = null): void
+    public function clear(int $cartId, ?PDO $pdo = null): void
     {
         $pdo ??= Database::connection();
-        $pdo->prepare('DELETE FROM carts WHERE id = :id')->execute(['id' => $cartId]);
+        $pdo->prepare('DELETE FROM cart_items WHERE cart_id = :cid')
+            ->execute(['cid' => $cartId]);
     }
 
     public function productStock(int $productId, ?PDO $pdo = null): ?array
     {
         $pdo ??= Database::connection();
-        $stmt = $pdo->prepare('SELECT id, name, stock, active FROM products WHERE id = :id');
+        $stmt = $pdo->prepare(
+            'SELECT id, name, price, stock, active FROM products WHERE id = :id'
+        );
         $stmt->execute(['id' => $productId]);
         return $stmt->fetch() ?: null;
     }

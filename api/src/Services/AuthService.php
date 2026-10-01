@@ -12,13 +12,9 @@ final class AuthService
     public function __construct(
         private UserRepository  $users  = new UserRepository(),
         private TokenRepository $tokens = new TokenRepository(),
-        private CartService     $carts  = new CartService(),
     ) {}
 
-    // ---------------------------------------------------------------
-    // REGISTRO
-    // ---------------------------------------------------------------
-    public function register(array $data, ?string $visitorCartToken): array
+    public function register(array $data): array
     {
         $v = new Validator($data);
         $v->required('name', 'nome')
@@ -36,7 +32,7 @@ final class AuthService
             ]);
         }
 
-        return Database::transaction(function () use ($data, $visitorCartToken) {
+        return Database::transaction(function () use ($data) {
             $user = $this->users->create([
                 'name'     => trim($data['name']),
                 'email'    => $data['email'],
@@ -44,27 +40,17 @@ final class AuthService
                 'role'     => 'cliente',
             ]);
 
-            $warnings = [];
-            if ($visitorCartToken) {
-                $merge = $this->carts->mergeVisitorCartIntoUser($visitorCartToken, (int) $user['id']);
-                $warnings = $merge['warnings'];
-            }
-
             $token = $this->tokens->issue((int) $user['id']);
 
             return [
                 'user'       => $user,
                 'token'      => $token['token'],
                 'expires_at' => $token['expires_at'],
-                'warnings'   => $warnings,
             ];
         });
     }
 
-    // ---------------------------------------------------------------
-    // LOGIN
-    // ---------------------------------------------------------------
-    public function login(array $data, ?string $visitorCartToken): array
+    public function login(array $data): array
     {
         $v = new Validator($data);
         $v->required('email', 'e-mail')->email('email')
@@ -73,21 +59,14 @@ final class AuthService
 
         $user = $this->users->findByEmail($data['email']);
 
-        // Mensagem genérica: não revela se o e-mail existe
         if (!$user || !password_verify($data['password'], $user['password'])) {
             throw new HttpException(401, 'Credenciais inválidas.');
-        }
-
-        $warnings = [];
-        if ($visitorCartToken) {
-            $merge = $this->carts->mergeVisitorCartIntoUser($visitorCartToken, (int) $user['id']);
-            $warnings = $merge['warnings'];
         }
 
         $token = $this->tokens->issue((int) $user['id']);
 
         return [
-            'user'       => [
+            'user' => [
                 'id'    => (int) $user['id'],
                 'name'  => $user['name'],
                 'email' => $user['email'],
@@ -95,13 +74,9 @@ final class AuthService
             ],
             'token'      => $token['token'],
             'expires_at' => $token['expires_at'],
-            'warnings'   => $warnings,
         ];
     }
 
-    // ---------------------------------------------------------------
-    // LOGOUT
-    // ---------------------------------------------------------------
     public function logout(string $plainToken): void
     {
         $this->tokens->revoke($plainToken);

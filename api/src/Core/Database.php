@@ -12,14 +12,23 @@ final class Database
     {
         if (self::$pdo instanceof PDO) return self::$pdo;
 
-        $driver = getenv('DB_CONNECTION') ?: 'pgsql';
-        $dsn = sprintf(
-            '%s:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-            $driver,
-            getenv('DB_HOST') ?: '127.0.0.1',
-            getenv('DB_PORT') ?: ($driver === 'pgsql' ? '5432' : '3306'),
-            getenv('DB_DATABASE') ?: 'ecommerce'
-        );
+        $driver = getenv('DB_CONNECTION') ?: 'mysql';
+
+        if ($driver === 'pgsql') {
+            $dsn = sprintf(
+                'pgsql:host=%s;port=%s;dbname=%s',
+                getenv('DB_HOST') ?: '127.0.0.1',
+                getenv('DB_PORT') ?: '5432',
+                getenv('DB_DATABASE') ?: 'ecommerce'
+            );
+        } else {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+                getenv('DB_HOST') ?: '127.0.0.1',
+                getenv('DB_PORT') ?: '3306',
+                getenv('DB_DATABASE') ?: 'ecommerce'
+            );
+        }
 
         self::$pdo = new PDO(
             $dsn,
@@ -35,17 +44,19 @@ final class Database
         return self::$pdo;
     }
 
-    /** Executa um callback dentro de uma transação. */
-    public static function transaction(callable $fn)
+    public static function transaction(callable $fn): mixed
     {
         $pdo = self::connection();
         $pdo->beginTransaction();
+
         try {
             $result = $fn($pdo);
             $pdo->commit();
             return $result;
         } catch (Throwable $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             throw $e;
         }
     }

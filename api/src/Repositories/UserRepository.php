@@ -39,8 +39,7 @@ final class UserRepository
 
         $stmt = $pdo->prepare(
             'INSERT INTO users (name, email, password, role, created_at, updated_at)
-             VALUES (:name, :email, :password, :role, NOW(), NOW())
-             RETURNING id, name, email, role, created_at'
+            VALUES (:name, :email, :password, :role, NOW(), NOW())'
         );
 
         $stmt->execute([
@@ -50,7 +49,10 @@ final class UserRepository
             'role'     => $data['role'] ?? 'cliente',
         ]);
 
-        return $stmt->fetch();
+        $id = (int) $pdo->lastInsertId();
+
+        // findById já devolve sem o hash da senha
+        return $this->findById($id);
     }
 
     public function updateProfile(int $id, array $data): array
