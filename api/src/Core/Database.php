@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Core;
 
 use PDO;
@@ -6,58 +8,53 @@ use Throwable;
 
 final class Database
 {
-    private static ?PDO $pdo = null;
+    private static ?PDO $connection = null;
 
     public static function connection(): PDO
     {
-        if (self::$pdo instanceof PDO) return self::$pdo;
-
-        $driver = getenv('DB_CONNECTION') ?: 'mysql';
-
-        if ($driver === 'pgsql') {
-            $dsn = sprintf(
-                'pgsql:host=%s;port=%s;dbname=%s',
-                getenv('DB_HOST') ?: '127.0.0.1',
-                getenv('DB_PORT') ?: '5432',
-                getenv('DB_DATABASE') ?: 'ecommerce'
-            );
-        } else {
-            $dsn = sprintf(
-                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-                getenv('DB_HOST') ?: '127.0.0.1',
-                getenv('DB_PORT') ?: '3306',
-                getenv('DB_DATABASE') ?: 'ecommerce'
-            );
+        if (self::$connection instanceof PDO) {
+            return self::$connection;
         }
 
-        self::$pdo = new PDO(
+        $driver = strtolower(getenv('DB_CONNECTION') ?: 'mysql');
+        $host = getenv('DB_HOST') ?: '127.0.0.1';
+        $port = getenv('DB_PORT') ?: ($driver === 'pgsql' ? '5432' : '3306');
+        $database = getenv('DB_DATABASE') ?: 'ecommerce';
+
+        if ($driver === 'pgsql') {
+            $dsn = "pgsql:host={$host};port={$port};dbname={$database}";
+        } else {
+            $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
+        }
+
+        self::$connection = new PDO(
             $dsn,
             getenv('DB_USERNAME') ?: 'root',
             getenv('DB_PASSWORD') ?: '',
             [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ],
         );
 
-        return self::$pdo;
+        return self::$connection;
     }
 
-    public static function transaction(callable $fn): mixed
+    public static function transaction(callable $callback): mixed
     {
         $pdo = self::connection();
         $pdo->beginTransaction();
 
         try {
-            $result = $fn($pdo);
+            $result = $callback($pdo);
             $pdo->commit();
             return $result;
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            throw $e;
+            throw $exception;
         }
     }
 }

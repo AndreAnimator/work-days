@@ -73,12 +73,6 @@ final class CartRepository
         $stmt->execute(['cid' => $cartId, 'pid' => $productId]);
     }
 
-    public function clear(int $cartId, ?PDO $pdo = null): void
-    {
-        $pdo ??= Database::connection();
-        $pdo->prepare('DELETE FROM cart_items WHERE cart_id = :cid')
-            ->execute(['cid' => $cartId]);
-    }
 
     public function productStock(int $productId, ?PDO $pdo = null): ?array
     {

@@ -55,28 +55,4 @@ final class UserRepository
         return $this->findById($id);
     }
 
-    public function updateProfile(int $id, array $data): array
-    {
-        $fields = [];
-        $params = ['id' => $id];
-
-        if (isset($data['name'])) {
-            $fields[] = 'name = :name';
-            $params['name'] = trim($data['name']);
-        }
-        if (!empty($data['password'])) {
-            $fields[] = 'password = :password';
-            $params['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        }
-        if (!$fields) {
-            return $this->findById($id);
-        }
-
-        $fields[] = 'updated_at = NOW()';
-
-        $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id';
-        Database::connection()->prepare($sql)->execute($params);
-
-        return $this->findById($id);
-    }
 }

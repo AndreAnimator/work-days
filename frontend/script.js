@@ -1,25 +1,22 @@
-const API_URL = 'http://localhost:8000/api/auth';
+const API_URL = 'http://localhost:8000/api';
 
-const authModal = document.getElementById('auth-modal');
-const authOverlay = document.getElementById('auth-overlay');
-const closeAuthBtn = document.getElementById('close-auth-btn');
-const accountBtn = document.getElementById('account-btn');
+const $ = (selector) => document.querySelector(selector);
 
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('register-form');
-
-const tabLogin = document.getElementById('tab-login');
-const tabRegister = document.getElementById('tab-register');
-
-const loginMessage = document.getElementById('login-message');
-const registerMessage = document.getElementById('register-message');
-
-const searchForm = document.getElementById('search-form');
+const authModal = $('#auth-modal');
+const authOverlay = $('#auth-overlay');
+const loginForm = $('#login-form');
+const registerForm = $('#register-form');
+const loginMessage = $('#login-message');
+const registerMessage = $('#register-message');
+const productsContainer = $('#produtos');
+const searchForm = $('#search-form');
+const searchInput = $('#busca');
+const cartCount = $('#cart-count');
 
 function showMessage(element, message, type = 'error') {
   if (!element) return;
   element.textContent = message;
-  element.className = `auth-message ${type}`;
+  element.className = `auth-message ${message ? type : ''}`.trim();
 }
 
 function clearMessages() {
@@ -33,197 +30,261 @@ function setButtonLoading(button, loading, loadingText, normalText) {
   button.textContent = loading ? loadingText : normalText;
 }
 
-function openAuthModal() {
-  if (!authModal) return;
+function saveSession(data) {
+  if (data.token) localStorage.setItem('token', data.token);
+  if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+  if (data.expires_at) localStorage.setItem('token_expires_at', data.expires_at);
+}
 
-  authModal.classList.remove('hidden');
-  authModal.setAttribute('aria-hidden', 'false');
+function clearSession() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('token_expires_at');
+}
 
-  showLogin();
-
-  setTimeout(() => {
-    document.getElementById('login-email')?.focus();
-  }, 50);
+function openAuthModal(tab = 'login') {
+  authModal?.classList.remove('hidden');
+  authModal?.setAttribute('aria-hidden', 'false');
+  tab === 'register' ? showRegister() : showLogin();
 }
 
 function closeAuthModal() {
-  if (!authModal) return;
-
-  authModal.classList.add('hidden');
-  authModal.setAttribute('aria-hidden', 'true');
-
+  authModal?.classList.add('hidden');
+  authModal?.setAttribute('aria-hidden', 'true');
   clearMessages();
 }
-
-if (accountBtn) {
-  accountBtn.addEventListener('click', (event) => {
-    event.preventDefault();
-    openAuthModal();
-  });
-}
-
-if (closeAuthBtn) {
-  closeAuthBtn.addEventListener('click', closeAuthModal);
-}
-
-if (authOverlay) {
-  authOverlay.addEventListener('click', closeAuthModal);
-}
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    closeAuthModal();
-  }
-});
 
 function showLogin() {
   loginForm?.classList.remove('hidden');
   registerForm?.classList.add('hidden');
-
-  tabLogin?.classList.add('active');
-  tabRegister?.classList.remove('active');
-
+  $('#tab-login')?.classList.add('active');
+  $('#tab-register')?.classList.remove('active');
   clearMessages();
 }
 
 function showRegister() {
   loginForm?.classList.add('hidden');
   registerForm?.classList.remove('hidden');
-
-  tabLogin?.classList.remove('active');
-  tabRegister?.classList.add('active');
-
+  $('#tab-login')?.classList.remove('active');
+  $('#tab-register')?.classList.add('active');
   clearMessages();
-
-  setTimeout(() => {
-    document.getElementById('register-name')?.focus();
-  }, 50);
 }
-
-tabLogin?.addEventListener('click', showLogin);
-tabRegister?.addEventListener('click', showRegister);
 
 async function parseResponse(response) {
   const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('application/json')) {
-    return await response.json();
-  }
+  if (contentType.includes('application/json')) return response.json();
 
   const text = await response.text();
-
-  return {
-    message: text || 'Resposta inválida do servidor.'
-  };
+  return { message: text || 'Resposta inválida do servidor.' };
 }
 
 function getApiErrorMessage(data) {
-  if (!data) {
-    return 'Ocorreu um erro inesperado.';
-  }
-
-  if (data.message) {
-    return data.message;
-  }
-
-  if (data.errors) {
-    const errors = data.errors;
-    return Object.values(errors).flat().join(' ');
-  }
-
+  if (data?.message) return data.message;
+  if (data?.errors) return Object.values(data.errors).flat().join(' ');
   return 'Não foi possível concluir a operação.';
 }
 
+async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+  const headers = {
+    Accept: 'application/json',
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const data = await parseResponse(response);
+
+  if (!response.ok) {
+    const error = new Error(getApiErrorMessage(data));
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}
+
+async function loadProducts(search = '') {
+  if (!productsContainer) return;
+
+  productsContainer.innerHTML = '<p>Carregando produtos...</p>';
+
+  try {
+    const query = search ? `?search=${encodeURIComponent(search)}` : '';
+    const data = await request(`/products${query}`);
+    renderProducts(data.products || []);
+  } catch (error) {
+    console.error(error);
+    productsContainer.innerHTML = '<p>Não foi possível carregar os produtos.</p>';
+  }
+}
+
+function renderProducts(products) {
+  if (!products.length) {
+    productsContainer.innerHTML = '<p>Nenhum produto encontrado.</p>';
+    return;
+  }
+
+  productsContainer.innerHTML = products.map((product) => `
+    <article class="produto-card">
+      <div class="produto-card__img">
+        <img src="${escapeHtml(product.image || '')}" alt="${escapeHtml(product.name)}" loading="lazy">
+      </div>
+      <strong class="produto-card__nome">${escapeHtml(product.name)}</strong>
+      <p class="produto-card__desc">${escapeHtml(product.description || '')}</p>
+      <span class="produto-card__preco">${formatPrice(product.price)}</span>
+      <small>${Number(product.stock) > 0 ? `${product.stock} em estoque` : 'Fora de estoque'}</small>
+      <button
+        class="produto-card__btn"
+        type="button"
+        data-product-id="${Number(product.id)}"
+        ${Number(product.stock) <= 0 ? 'disabled' : ''}
+      >
+        Adicionar ao carrinho
+      </button>
+    </article>
+  `).join('');
+
+  productsContainer.querySelectorAll('[data-product-id]').forEach((button) => {
+    button.addEventListener('click', () => addToCart(Number(button.dataset.productId), button));
+  });
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function formatPrice(value) {
+  return Number(value).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+}
+
+async function addToCart(productId, button) {
+  if (!localStorage.getItem('token')) {
+    openAuthModal('login');
+    showMessage(loginMessage, 'Faça login para adicionar produtos ao carrinho.');
+    return;
+  }
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Adicionando...';
+
+  try {
+    const data = await request('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({ product_id: productId, quantity: 1 }),
+    });
+
+    updateCartCount(data.items_count);
+    button.textContent = 'Adicionado!';
+    setTimeout(() => { button.textContent = originalText; }, 800);
+  } catch (error) {
+    if (error.status === 401) clearSession();
+    alert(error.message);
+    button.textContent = originalText;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function updateCartCount(count) {
+  if (cartCount) cartCount.textContent = String(count ?? 0);
+}
+
+async function loadCart() {
+  if (!localStorage.getItem('token')) {
+    updateCartCount(0);
+    return;
+  }
+
+  try {
+    const data = await request('/cart');
+    updateCartCount(data.items_count);
+  } catch (error) {
+    if (error.status === 401) clearSession();
+  }
+}
+
+$('#account-btn')?.addEventListener('click', (event) => {
+  event.preventDefault();
+  openAuthModal();
+});
+
+$('#close-auth-btn')?.addEventListener('click', closeAuthModal);
+authOverlay?.addEventListener('click', closeAuthModal);
+$('#tab-login')?.addEventListener('click', showLogin);
+$('#tab-register')?.addEventListener('click', showRegister);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !authModal?.classList.contains('hidden')) {
+    closeAuthModal();
+  }
+});
+
 loginForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
-
   clearMessages();
 
-  const emailInput = document.getElementById('login-email');
-  const passwordInput = document.getElementById('login-password');
-  const submitButton = loginForm.querySelector('button[type="submit"]');
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
+  const email = $('#login-email').value.trim();
+  const password = $('#login-password').value;
+  const button = loginForm.querySelector('button[type="submit"]');
 
   if (!email || !password) {
     showMessage(loginMessage, 'Preencha o e-mail e a senha.');
     return;
   }
 
-  setButtonLoading(submitButton, true, 'Entrando...', 'Entrar');
+  setButtonLoading(button, true, 'Entrando...', 'Entrar');
 
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const data = await request('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
-    const data = await parseResponse(response);
-
-    if (!response.ok) {
-      showMessage(loginMessage, getApiErrorMessage(data));
-      return;
-    }
-
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    if (data.expires_at) {
-      localStorage.setItem('token_expires_at', data.expires_at);
-    }
-
+    saveSession(data);
     showMessage(loginMessage, 'Login realizado com sucesso!', 'success');
-
-    setTimeout(() => {
-      closeAuthModal();
-    }, 500);
-
+    await loadCart();
+    setTimeout(closeAuthModal, 400);
   } catch (error) {
-    console.error('Erro ao realizar login:', error);
-    showMessage(
-      loginMessage,
-      'Não foi possível conectar ao servidor. Verifique se a API está funcionando.'
-    );
+    showMessage(loginMessage, error.message);
   } finally {
-    setButtonLoading(submitButton, false, 'Entrando...', 'Entrar');
+    setButtonLoading(button, false, 'Entrando...', 'Entrar');
   }
 });
 
 registerForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
-
   clearMessages();
 
-  const nameInput = document.getElementById('register-name');
-  const emailInput = document.getElementById('register-email');
-  const passwordInput = document.getElementById('register-password');
-  const confirmationInput = document.getElementById('register-password-confirmation');
-
-  const submitButton = registerForm.querySelector('button[type="submit"]');
+  const nameInput = $('#register-name');
+  const emailInput = $('#register-email');
+  const passwordInput = $('#register-password');
+  const confirmationInput = $('#register-password-confirmation');
+  const button = registerForm.querySelector('button[type="submit"]');
 
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
   const password = passwordInput.value;
   const passwordConfirmation = confirmationInput.value;
 
-  // Validações do frontend
   if (name.length < 3) {
     showMessage(registerMessage, 'O nome deve possuir pelo menos 3 caracteres.');
     nameInput.focus();
     return;
   }
 
-  if (!email) {
+  if (!emailInput.validity.valid) {
     showMessage(registerMessage, 'Informe um e-mail válido.');
     emailInput.focus();
     return;
@@ -241,140 +302,64 @@ registerForm?.addEventListener('submit', async (event) => {
     return;
   }
 
-  setButtonLoading(submitButton, true, 'Cadastrando...', 'Cadastrar');
+  setButtonLoading(button, true, 'Cadastrando...', 'Cadastrar');
 
   try {
-    const response = await fetch(`${API_URL}/register`, {
+    const data = await request('/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        password_confirmation: passwordConfirmation
-      })
+      body: JSON.stringify({ name, email, password, password_confirmation: passwordConfirmation }),
     });
 
-    const data = await parseResponse(response);
-
-    if (!response.ok) {
-      showMessage(registerMessage, getApiErrorMessage(data));
-      return;
-    }
-
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    if (data.expires_at) {
-      localStorage.setItem('token_expires_at', data.expires_at);
-    }
-
+    saveSession(data);
     showMessage(registerMessage, 'Cadastro realizado com sucesso!', 'success');
+    await loadCart();
 
-    // Depois do cadastro, abre a aba de login.
-    // Como a API já devolveu token, o usuário também permanece autenticado.
     setTimeout(() => {
+      registerForm.reset();
       showLogin();
-      loginForm.reset();
-
-      if (emailInput.value) {
-        document.getElementById('login-email').value = emailInput.value;
-      }
-    }, 700);
-
+      $('#login-email').value = email;
+      $('#login-password').focus();
+    }, 500);
   } catch (error) {
-    console.error('Erro ao realizar cadastro:', error);
-    showMessage(
-      registerMessage,
-      'Não foi possível conectar ao servidor. Verifique se a API está funcionando.'
-    );
+    showMessage(registerMessage, error.message);
   } finally {
-    setButtonLoading(submitButton, false, 'Cadastrando...', 'Cadastrar');
+    setButtonLoading(button, false, 'Cadastrando...', 'Cadastrar');
   }
 });
 
 async function logout() {
-  const token = localStorage.getItem('token');
-
-  if (!token) return;
-
   try {
-    await fetch(`${API_URL}/logout`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    if (localStorage.getItem('token')) {
+      await request('/auth/logout', { method: 'POST' });
+    }
   } catch (error) {
-    console.error('Erro ao encerrar sessão:', error);
+    console.error(error);
   } finally {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('token_expires_at');
+    clearSession();
+    updateCartCount(0);
   }
 }
 
 window.logout = logout;
 
 async function checkAuth() {
-  const token = localStorage.getItem('token');
-
-  if (!token) return null;
+  if (!localStorage.getItem('token')) return null;
 
   try {
-    const response = await fetch(`${API_URL}/me`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token_expires_at');
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    return data.user || null;
+    const data = await request('/auth/me');
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data.user;
   } catch (error) {
-    console.error('Não foi possível verificar a sessão:', error);
+    if (error.status === 401) clearSession();
     return null;
   }
 }
 
 searchForm?.addEventListener('submit', (event) => {
   event.preventDefault();
-
-  const searchInput = document.getElementById('busca');
-  const term = searchInput.value.trim();
-
-  if (!term) return;
-
-  console.log('Busca:', term);
-
+  loadProducts(searchInput.value.trim());
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = await checkAuth();
-
-  if (user) {
-    console.log(`Usuário autenticado: ${user.name}`);
-  }
+  await Promise.all([checkAuth(), loadProducts(), loadCart()]);
 });

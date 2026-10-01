@@ -54,11 +54,4 @@ final class TokenRepository
         $stmt->execute(['hash' => hash('sha256', $plain)]);
     }
 
-    public function revokeAllForUser(int $userId): void
-    {
-        $stmt = Database::connection()->prepare(
-            'DELETE FROM personal_access_tokens WHERE user_id = :uid'
-        );
-        $stmt->execute(['uid' => $userId]);
-    }
 }
