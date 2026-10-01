@@ -79,16 +79,20 @@ h1,h2,h3,.logo__text strong{font-family:'Noto Serif SC',serif}
 .section-head h2{font-size:1.5rem;font-weight:900;color:var(--lacquer)}
 .section-head a{color:var(--jade);font-size:.85rem;font-weight:600}
 .produtos{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
-
 /* Modelo do card de produto (gere este HTML no JS) */
-.produto-card{background:var(--paper-2);border:1px solid var(--border);border-radius:2px;padding:14px;display:flex;flex-direction:column}
-.produto-card__img{height:170px;display:grid;place-items:center;margin-bottom:12px}
-.produto-card__img img{max-width:100%;max-height:100%;object-fit:contain}
-.produto-card__nome{font-size:.85rem;font-weight:700}
-.produto-card__desc{font-size:.78rem;color:var(--muted)}
+.produto-card{background:var(--paper-2);border:1px solid var(--border);border-radius:2px;padding:14px;display:flex;flex-direction:column;transition:box-shadow .2s}
+.produto-card:hover{box-shadow:0 6px 16px rgba(61,10,13,.15)}
+
+/* Área da imagem: quadrada, com tamanho fixo e sem deixar nada vazar */
+.produto-card__img{aspect-ratio:1/1;margin-bottom:12px;overflow:hidden;background:#fff;border:1px solid var(--border);border-radius:2px}
+.produto-card__img img{display:block;width:100%;height:100%;object-fit:contain;font-size:.8rem;color:var(--muted);text-align:center}
+
+.produto-card__nome{font-size:.85rem;font-weight:700;line-height:1.3}
+/* Descrição limitada a 2 linhas para os cards ficarem com a mesma altura */
+.produto-card__desc{font-size:.78rem;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:calc(2 * 1.5em)}
 .produto-card__stars{font-size:.78rem;color:var(--muted);margin:6px 0}
 .produto-card__stars i{color:var(--gold);font-style:normal;letter-spacing:1px}
-.produto-card__preco{font-family:'Noto Serif SC',serif;font-size:1.15rem;font-weight:700;color:var(--lacquer);margin:6px 0 12px}
+.produto-card__preco{font-family:'Noto Serif SC',serif;font-size:1.15rem;font-weight:700;color:var(--lacquer);margin:8px 0 12px}
 .produto-card__btn{margin-top:auto;background:var(--lacquer);color:var(--gold-light);font-weight:600;font-size:.85rem;padding:10px;border-radius:2px;border:1px solid var(--gold);transition:background .2s}
 .produto-card__btn:hover{background:var(--lacquer-dark)}
 
