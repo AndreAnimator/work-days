@@ -89,7 +89,7 @@ h1,h2,h3,.logo__text strong{font-family:'Noto Serif SC',serif}
 
 .produto-card__nome{font-size:.85rem;font-weight:700;line-height:1.3}
 /* Descrição limitada a 2 linhas para os cards ficarem com a mesma altura */
-.produto-card__desc{font-size:.78rem;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:calc(2 * 1.5em)}
+.produto-card__desc{font-size:.78rem;line-height:1.5;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:3em}
 .produto-card__stars{font-size:.78rem;color:var(--muted);margin:6px 0}
 .produto-card__stars i{color:var(--gold);font-style:normal;letter-spacing:1px}
 .produto-card__preco{font-family:'Noto Serif SC',serif;font-size:1.15rem;font-weight:700;color:var(--lacquer);margin:8px 0 12px}
