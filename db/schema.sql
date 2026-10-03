@@ -69,8 +69,8 @@ CREATE TABLE IF NOT EXISTS cart_items (
 -- Login: admin@sinucapro.com | Senha: Admin@12345 (hash bcrypt abaixo).
 -- Troque a senha antes de qualquer uso fora do ambiente local.
 INSERT INTO users (name, email, password, role)
-SELECT 'Administrador', 'admin@sinucapro.com',
-       '$2y$10$HSbjeaVDYd.qC4xDFF8xVuANRUXb06yZbuCljE2eeVO9FtrXnNXM6', 'admin'
+SELECT 'Administrador', 'admin@gmail.com',
+       '$2y$12$f3Sbo8YWav5L1oTeYIQYJ.jgGLAyDCCN/92KI3jruIQxUu2XNPrre', 'admin'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@sinucapro.com');
 
 INSERT INTO products (name, description, category, price, image, stock)

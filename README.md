@@ -64,7 +64,7 @@ Usuário admin criado pelo `db/schema.sql` (apenas desenvolvimento — troque a 
 
 | E-mail                | Senha         |
 |-----------------------|---------------|
-| `admin@sinucapro.com` | `Admin@12345` |
+| `admin@sinucapro.com` | `senha-forte` |
 
 ## Painel administrativo
 
