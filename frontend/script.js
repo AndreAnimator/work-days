@@ -1,5 +1,5 @@
-// URL base do seu servidor PHP (Ajuste a porta ou subpasta se necessário)
-const API_URL = 'http://localhost:8000';
+// URL base do seu servidor PHP (Atualizado para usar 127.0.0.1 e resolver o erro de CORS)
+const API_URL = 'http://127.0.0.1:8000';
 
 // Seleção de elementos do DOM
 const authModal = document.getElementById('auth-modal');
@@ -183,7 +183,7 @@ async function logout() {
 
   if (token) {
     try {
-      await fetch(`${API_URL}/logout.php`, {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -198,7 +198,7 @@ async function logout() {
   localStorage.removeItem('user');
 }
 
-// EXPOSIÇÃO GLOBAL DE FUNÇÕES PARA OUTROS SCRIPTS (COMO PERFIL.JS)
+// EXPOSIÇÃO GLOBAL DE FUNÇÕES PARA OUTROS SCRIPTS
 window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;
 window.logout = logout;
