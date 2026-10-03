@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // USUÁRIO LOGADO
     // ----------------------------------------------------
     if (displayName) displayName.textContent = userData.name || 'Cliente Imperial';
-    if (displayRole) displayRole.textContent = 'Cliente Imperial';
+    if (displayRole) displayRole.textContent = userData.role === 'admin' ? 'Administrador' : 'Cliente Imperial';
     if (nameInput) nameInput.value = userData.name || '';
     if (emailInput) emailInput.value = userData.email || '';
 

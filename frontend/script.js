@@ -198,6 +198,84 @@ async function logout() {
   localStorage.removeItem('user');
 }
 
+// ==========================================
+// NAVEGAÇÃO POR PAPEL + REDIRECIONAMENTO PARA LOGIN
+// ==========================================
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch {
+    return null;
+  }
+}
+
+// Link do painel: apenas conveniência de navegação. Quem decide o acesso é o
+// servidor (GET /api/admin/check), que o admin.html consulta antes de exibir o painel.
+function syncAdminLink(user) {
+  const actions = document.querySelector('.header__actions');
+  if (!actions) return;
+
+  const existing = actions.querySelector('[data-admin-link]');
+  const isAdmin = Boolean(localStorage.getItem('token')) && user?.role === 'admin';
+
+  if (!isAdmin) {
+    existing?.remove();
+    return;
+  }
+
+  if (existing) return;
+
+  const link = document.createElement('a');
+  link.href = 'admin.html';
+  link.className = 'icon-btn';
+  link.dataset.adminLink = '';
+  link.title = 'Painel administrativo';
+  link.setAttribute('aria-label', 'Painel administrativo');
+  link.innerHTML = '&#9881;';
+  actions.prepend(link);
+}
+
+// O papel guardado no login pode ficar velho (ex.: usuário promovido a admin depois).
+// Em cada carga de página, busca o usuário atual no servidor e atualiza o cache.
+async function syncUserFromServer() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
+      headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.status === 401) {
+      // Token revogado/expirado: encerra a sessão local
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('token_expires_at');
+      return;
+    }
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+    if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+  } catch (err) {
+    // Sem conexão com a API: mantém o que já estava salvo
+    console.error('Não foi possível atualizar os dados do usuário:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Mostra de imediato com o valor salvo e corrige depois que o servidor responder
+  syncAdminLink(readStoredUser());
+  await syncUserFromServer();
+  syncAdminLink(readStoredUser());
+
+  // admin.html redireciona para "index.html?login=1" quando não há sessão
+  if (!localStorage.getItem('token') && new URLSearchParams(window.location.search).get('login') === '1') {
+    openAuthModal();
+  }
+});
+
 // EXPOSIÇÃO GLOBAL DE FUNÇÕES PARA OUTROS SCRIPTS
 window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;

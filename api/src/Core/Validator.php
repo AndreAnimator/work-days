@@ -16,6 +16,25 @@ final class Validator
         return $this;
     }
 
+    /** Garante que o valor, se enviado, seja texto (evita arrays/objetos no JSON). */
+    public function string(string $field, string $label): self
+    {
+        $v = $this->data[$field] ?? null;
+        if ($v !== null && !is_string($v)) {
+            $this->errors[$field][] = "O campo {$label} deve ser um texto.";
+        }
+        return $this;
+    }
+
+    public function max(string $field, int $max, string $label): self
+    {
+        $v = $this->data[$field] ?? null;
+        if (is_string($v) && mb_strlen($v) > $max) {
+            $this->errors[$field][] = "O campo {$label} deve ter no máximo {$max} caracteres.";
+        }
+        return $this;
+    }
+
     public function email(string $field, string $label = 'e-mail'): self
     {
         $v = $this->data[$field] ?? null;
@@ -38,6 +57,12 @@ final class Validator
     {
         $a = $this->data[$field] ?? null;
         $b = $this->data[$confirmationField] ?? null;
+
+        // Confirmação ausente já é reportada por required(); evita mensagem duplicada.
+        if ($b === null || $b === '') {
+            return $this;
+        }
+
         if ($a !== $b) {
             $this->errors[$confirmationField][] = "A confirmação de {$label} não confere.";
         }
