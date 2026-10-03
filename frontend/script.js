@@ -198,6 +198,38 @@ async function logout() {
   localStorage.removeItem('user');
 }
 
+// ==========================================
+// NAVEGAÇÃO POR PAPEL + REDIRECIONAMENTO PARA LOGIN
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('token');
+
+  // Link do painel: apenas conveniência de navegação. Quem decide o acesso é o
+  // servidor (GET /api/admin/check), que o admin.html consulta antes de exibir o painel.
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const actions = document.querySelector('.header__actions');
+
+    if (token && user?.role === 'admin' && actions && !actions.querySelector('[data-admin-link]')) {
+      const link = document.createElement('a');
+      link.href = 'admin.html';
+      link.className = 'icon-btn';
+      link.dataset.adminLink = '';
+      link.title = 'Painel administrativo';
+      link.setAttribute('aria-label', 'Painel administrativo');
+      link.innerHTML = '&#9881;';
+      actions.prepend(link);
+    }
+  } catch (err) {
+    console.error('Dados de usuário inválidos no localStorage:', err);
+  }
+
+  // admin.html redireciona para "index.html?login=1" quando não há sessão
+  if (!token && new URLSearchParams(window.location.search).get('login') === '1') {
+    openAuthModal();
+  }
+});
+
 // EXPOSIÇÃO GLOBAL DE FUNÇÕES PARA OUTROS SCRIPTS
 window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;

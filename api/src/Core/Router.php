@@ -45,7 +45,11 @@ final class Router
             }
 
             foreach ($route['middleware'] as $middleware) {
-                (new $middleware())->handle($request);
+                // Aceita "Classe" ou "Classe:arg1,arg2" (ex.: Authenticate::class . ':admin')
+                [$class, $args] = array_pad(explode(':', $middleware, 2), 2, null);
+                $arguments = $args !== null && $args !== '' ? explode(',', $args) : [];
+
+                (new $class())->handle($request, ...$arguments);
             }
 
             [$class, $action] = $route['handler'];

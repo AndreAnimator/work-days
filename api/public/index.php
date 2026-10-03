@@ -4,6 +4,7 @@ declare(strict_types=1);
 // 1. CARREGAR AUTOLOAD / BOOTSTRAP PRIMEIRO
 require __DIR__ . '/../bootstrap.php';
 
+use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\CartController;
 use App\Controllers\ProductController;
@@ -34,6 +35,9 @@ $router->post('/api/auth/register', [AuthController::class, 'register']);
 $router->post('/api/auth/login', [AuthController::class, 'login']);
 $router->post('/api/auth/logout', [AuthController::class, 'logout'], [Authenticate::class]);
 $router->get('/api/auth/me', [AuthController::class, 'me'], [Authenticate::class]);
+
+// Área administrativa: ':admin' faz o Authenticate responder 403 para clientes.
+$router->get('/api/admin/check', [AdminController::class, 'check'], [Authenticate::class . ':admin']);
 
 $router->get('/api/cart', [CartController::class, 'show'], [Authenticate::class]);
 $router->post('/api/cart/items', [CartController::class, 'addItem'], [Authenticate::class]);

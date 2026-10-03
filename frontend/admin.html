@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Painel Administrativo &middot; Sinuca Pro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@400;700;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="adm-body">
+
+  <header class="header">
+    <div class="container header__inner adm-header">
+      <a href="index.html" class="logo">
+        <span class="logo__icon" aria-hidden="true">S</span>
+        <span class="logo__text">
+          <strong>SINUCA <em>PRO</em></strong>
+          <small>Painel administrativo</small>
+        </span>
+      </a>
+
+      <div class="adm-header__right">
+        <span class="adm-user hidden" id="adm-user">
+          <span class="adm-user__name" id="adm-user-name"></span>
+          <span class="adm-badge adm-badge--role">ADMIN</span>
+        </span>
+        <a href="index.html" class="adm-link">Ver loja</a>
+        <button type="button" class="adm-link adm-link--button" id="adm-logout">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container adm-main">
+
+    <!-- Estado inicial: nada do painel é exibido até o servidor confirmar o papel ADMIN -->
+    <section class="adm-state" id="adm-checking" aria-live="polite">
+      <div class="adm-spinner" aria-hidden="true"></div>
+      <p>Verificando suas permissões&hellip;</p>
+    </section>
+
+    <!-- Acesso negado (usuário autenticado, mas não é admin) -->
+    <section class="adm-state adm-state--denied hidden" id="adm-denied" role="alert">
+      <h1>Acesso negado</h1>
+      <p>Esta área é exclusiva para administradores. Sua conta não tem permissão para acessá-la.</p>
+      <a href="index.html" class="btn btn--primary">Voltar à loja</a>
+    </section>
+
+    <!-- Erro ao verificar permissões (API fora do ar, etc.) -->
+    <section class="adm-state adm-state--error hidden" id="adm-fatal" role="alert">
+      <h1>Não foi possível carregar o painel</h1>
+      <p id="adm-fatal-message">Erro de conexão com o servidor.</p>
+      <button type="button" class="btn btn--primary" id="adm-retry">Tentar novamente</button>
+    </section>
+
+    <!-- PAINEL: só é exibido após GET /api/admin/check responder 200 -->
+    <section class="adm-panel hidden" id="adm-panel" aria-labelledby="adm-title">
+      <div class="adm-panel__head">
+        <div>
+          <h1 id="adm-title">Produtos</h1>
+          <p class="adm-muted" id="adm-summary">&nbsp;</p>
+        </div>
+        <button type="button" class="btn btn--primary" id="adm-new">+ Novo produto</button>
+      </div>
+
+      <div class="adm-toolbar">
+        <label class="adm-field adm-field--grow">
+          <span class="adm-field__label">Buscar</span>
+          <input type="search" id="adm-search" placeholder="Nome ou descrição">
+        </label>
+
+        <label class="adm-field">
+          <span class="adm-field__label">Categoria</span>
+          <select id="adm-filter-category">
+            <option value="">Todas</option>
+          </select>
+        </label>
+
+        <label class="adm-field">
+          <span class="adm-field__label">Situação</span>
+          <select id="adm-filter-status">
+            <option value="">Todas</option>
+            <option value="active">Ativos</option>
+            <option value="inactive">Inativos</option>
+            <option value="out">Sem estoque</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="adm-feedback hidden" id="adm-feedback" role="status" aria-live="polite"></div>
+
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th scope="col">Produto</th>
+              <th scope="col">Categoria</th>
+              <th scope="col" class="adm-num">Preço</th>
+              <th scope="col" class="adm-num">Estoque</th>
+              <th scope="col">Situação</th>
+              <th scope="col" class="adm-actions-col">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="adm-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: criar / editar produto -->
+  <dialog class="adm-dialog" id="adm-form-dialog" aria-labelledby="adm-form-title">
+    <form id="adm-form" class="adm-form" novalidate>
+      <h2 id="adm-form-title">Novo produto</h2>
+
+      <div class="adm-form__error hidden" id="adm-form-error" role="alert"></div>
+
+      <label class="adm-field">
+        <span class="adm-field__label">Nome</span>
+        <input type="text" id="f-name" name="name" maxlength="150" required>
+        <span class="adm-field__error" data-error-for="name"></span>
+      </label>
+
+      <label class="adm-field">
+        <span class="adm-field__label">Descrição</span>
+        <textarea id="f-description" name="description" rows="3"></textarea>
+        <span class="adm-field__error" data-error-for="description"></span>
+      </label>
+
+      <div class="adm-form__row">
+        <label class="adm-field">
+          <span class="adm-field__label">Categoria</span>
+          <input type="text" id="f-category" name="category" list="adm-categories" maxlength="100" required>
+          <datalist id="adm-categories"></datalist>
+          <span class="adm-field__error" data-error-for="category"></span>
+        </label>
+
+        <label class="adm-field">
+          <span class="adm-field__label">Preço (R$)</span>
+          <input type="number" id="f-price" name="price" min="0" step="0.01" inputmode="decimal" required>
+          <span class="adm-field__error" data-error-for="price"></span>
+        </label>
+
+        <label class="adm-field">
+          <span class="adm-field__label">Estoque</span>
+          <input type="number" id="f-stock" name="stock" min="0" step="1" inputmode="numeric" required>
+          <span class="adm-field__error" data-error-for="stock"></span>
+        </label>
+      </div>
+
+      <label class="adm-field">
+        <span class="adm-field__label">URL da imagem</span>
+        <input type="url" id="f-image" name="image" maxlength="500" placeholder="https://...">
+        <span class="adm-field__error" data-error-for="image"></span>
+      </label>
+
+      <label class="adm-check">
+        <input type="checkbox" id="f-active" name="active" checked>
+        <span>Produto ativo (visível no catálogo)</span>
+      </label>
+
+      <div class="adm-form__footer">
+        <button type="button" class="adm-btn adm-btn--ghost" id="adm-form-cancel">Cancelar</button>
+        <button type="submit" class="btn btn--primary" id="adm-form-submit">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: confirmar exclusão -->
+  <dialog class="adm-dialog adm-dialog--small" id="adm-delete-dialog" aria-labelledby="adm-delete-title">
+    <form method="dialog" class="adm-form" id="adm-delete-form">
+      <h2 id="adm-delete-title">Excluir produto?</h2>
+      <p id="adm-delete-text" class="adm-muted"></p>
+      <div class="adm-form__error hidden" id="adm-delete-error" role="alert"></div>
+      <div class="adm-form__footer">
+        <button type="button" class="adm-btn adm-btn--ghost" id="adm-delete-cancel">Cancelar</button>
+        <button type="submit" class="adm-btn adm-btn--danger" id="adm-delete-confirm">Excluir</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="admin.js"></script>
+</body>
+</html>
