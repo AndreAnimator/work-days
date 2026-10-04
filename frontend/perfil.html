@@ -29,19 +29,27 @@
 
         <nav class="nav" aria-label="Principal">
           <a href="index.html">Início</a>
-          <a href="categoria.html?c=tacos">Tacos</a>
-          <a href="categoria.html?c=mesas">Mesas</a>
-          <a href="categoria.html?c=bolas">Bolas</a>
-          <a href="categoria.html?c=acessorios">Acessórios</a>
-          <a href="categoria.html?c=maletas">Maletas</a>
+          <a href="produtos.html">Produtos</a>
+          <a href="produtos.html?c=tacos">Tacos</a>
+          <a href="produtos.html?c=mesas">Mesas</a>
+          <a href="produtos.html?c=bolas">Bolas</a>
+          <a href="produtos.html?c=acessorios">Acessórios</a>
+          <a href="produtos.html?c=maletas">Maletas</a>
           <a href="#">Ofertas</a>
         </nav>
 
-        <form class="search" role="search" id="search-form">
+        <form
+          class="search"
+          role="search"
+          id="search-form"
+          action="produtos.html"
+          method="get"
+        >
           <input
             type="search"
             id="busca"
-            placeholder="Buscar produtos..."
+            name="q"
+            placeholder="Buscar produtos pelo nome..."
             aria-label="Buscar produtos"
           />
           <button type="submit" aria-label="Buscar">&#9906;</button>

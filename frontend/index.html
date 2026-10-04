@@ -29,19 +29,27 @@
 
         <nav class="nav" aria-label="Principal">
           <a href="index.html" class="active">Início</a>
-          <a href="categoria.html?c=tacos">Tacos</a>
-          <a href="categoria.html?c=mesas">Mesas</a>
-          <a href="categoria.html?c=bolas">Bolas</a>
-          <a href="categoria.html?c=acessorios">Acessórios</a>
-          <a href="categoria.html?c=maletas">Maletas</a>
+          <a href="produtos.html">Produtos</a>
+          <a href="produtos.html?c=tacos">Tacos</a>
+          <a href="produtos.html?c=mesas">Mesas</a>
+          <a href="produtos.html?c=bolas">Bolas</a>
+          <a href="produtos.html?c=acessorios">Acessórios</a>
+          <a href="produtos.html?c=maletas">Maletas</a>
           <a href="#">Ofertas</a>
         </nav>
 
-        <form class="search" id="search-form" role="search">
+        <form
+          class="search"
+          id="search-form"
+          role="search"
+          action="produtos.html"
+          method="get"
+        >
           <input
             type="search"
             id="busca"
-            placeholder="Buscar produtos..."
+            name="q"
+            placeholder="Buscar produtos pelo nome..."
             aria-label="Buscar produtos"
           />
           <button type="submit" aria-label="Buscar">&#9906;</button>
@@ -90,7 +98,7 @@
             apenas se divertir com os amigos.
           </p>
 
-          <a href="#destaques" class="btn btn--primary">
+          <a href="produtos.html" class="btn btn--primary">
             Ver produtos &rarr;
           </a>
         </div>
@@ -116,43 +124,43 @@
         id="categorias"
         aria-label="Categorias"
       >
-        <a href="categoria.html?c=tacos" class="cat">
+        <a href="produtos.html?c=tacos" class="cat">
           <div class="cat__img"></div>
           <h3>Tacos</h3>
           <span>Ver todos &rarr;</span>
         </a>
 
-        <a href="categoria.html?c=mesas" class="cat">
+        <a href="produtos.html?c=mesas" class="cat">
           <div class="cat__img"></div>
           <h3>Mesas</h3>
           <span>Ver todos &rarr;</span>
         </a>
 
-        <a href="categoria.html?c=bolas" class="cat">
+        <a href="produtos.html?c=bolas" class="cat">
           <div class="cat__img"></div>
           <h3>Bolas</h3>
           <span>Ver todos &rarr;</span>
         </a>
 
-        <a href="categoria.html?c=triangulos" class="cat">
+        <a href="produtos.html?c=triangulos" class="cat">
           <div class="cat__img"></div>
           <h3>Triângulos</h3>
           <span>Ver todos &rarr;</span>
         </a>
 
-        <a href="categoria.html?c=giz" class="cat">
+        <a href="produtos.html?c=giz" class="cat">
           <div class="cat__img"></div>
           <h3>Giz</h3>
           <span>Ver todos &rarr;</span>
         </a>
 
-        <a href="categoria.html?c=maletas" class="cat">
+        <a href="produtos.html?c=maletas" class="cat">
           <div class="cat__img"></div>
           <h3>Maletas</h3>
           <span>Ver todos &rarr;</span>
         </a>
 
-        <a href="categoria.html?c=acessorios" class="cat">
+        <a href="produtos.html?c=acessorios" class="cat">
           <div class="cat__img"></div>
           <h3>Acessórios</h3>
           <span>Ver todos &rarr;</span>
@@ -163,7 +171,7 @@
       <section class="container destaques" id="destaques">
         <div class="section-head">
           <h2>Produtos em destaque</h2>
-          <a href="#">Ver todos os produtos &rarr;</a>
+          <a href="produtos.html">Ver todos os produtos &rarr;</a>
         </div>
 
         <div class="produtos" id="produtos"></div>

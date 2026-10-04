@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Produtos - Sinuca Pro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@400;700;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="produtos.css">
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="container header__inner">
+
+      <a href="index.html" class="logo">
+        <span class="logo__icon" aria-hidden="true">S</span>
+        <span class="logo__text">
+          <strong>SINUCA <em>PRO</em></strong>
+          <small>Tudo para o seu jogo</small>
+        </span>
+      </a>
+
+      <nav class="nav" id="main-nav" aria-label="Principal">
+        <a href="index.html">Início</a>
+        <a href="produtos.html">Produtos</a>
+        <a href="produtos.html?c=tacos">Tacos</a>
+        <a href="produtos.html?c=mesas">Mesas</a>
+        <a href="produtos.html?c=bolas">Bolas</a>
+        <a href="produtos.html?c=acessorios">Acessórios</a>
+        <a href="produtos.html?c=maletas">Maletas</a>
+        <a href="#">Ofertas</a>
+      </nav>
+
+      <form class="search" id="search-form" role="search" action="produtos.html" method="get">
+        <input
+          type="search"
+          id="busca"
+          name="q"
+          placeholder="Buscar produtos pelo nome..."
+          aria-label="Buscar produtos pelo nome"
+          autocomplete="off"
+        >
+        <button type="submit" aria-label="Buscar">&#9906;</button>
+      </form>
+
+      <div class="header__actions">
+        <a href="perfil.html" class="icon-btn" aria-label="Minha conta">&#9787;</a>
+        <a href="#" class="icon-btn cart" aria-label="Carrinho">
+          &#128722;
+          <span class="cart__count" id="cart-count">0</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="categoria-main">
+
+    <section class="container categoria-head">
+      <nav class="breadcrumb" aria-label="Você está em">
+        <a href="index.html">Início</a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="produtos.html" id="breadcrumb-catalog">Produtos</a>
+        <span aria-hidden="true" id="breadcrumb-sep" hidden>&rsaquo;</span>
+        <span id="breadcrumb-current" hidden></span>
+      </nav>
+
+      <h1 id="page-title">Todos os produtos</h1>
+      <p id="page-blurb" class="categoria-head__blurb"></p>
+    </section>
+
+    <section class="container categoria-conteudo">
+
+      <div class="catalogo-toolbar">
+        <nav class="categoria-tabs" id="category-tabs" aria-label="Filtrar por categoria"></nav>
+
+        <div class="catalogo-sort">
+          <label for="sort-select">Ordenar por</label>
+          <select id="sort-select">
+            <option value="newest">Mais recentes</option>
+            <option value="price_asc">Menor preço</option>
+            <option value="price_desc">Maior preço</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h2 id="results-title">Todos os produtos</h2>
+        <span class="results-count" id="results-count" aria-live="polite"></span>
+      </div>
+
+      <p class="filtro-ativo" id="active-search" hidden>
+        <span>Resultados para <strong id="active-search-term"></strong></span>
+        <button type="button" id="clear-search">Limpar busca</button>
+      </p>
+
+      <div class="produtos" id="produtos" aria-live="polite" aria-busy="true"></div>
+
+    </section>
+
+  </main>
+
+  <footer class="beneficios">
+    <div class="container beneficios__inner">
+
+      <div class="beneficio">
+        <span class="beneficio__icon" aria-hidden="true">&#128666;</span>
+        <div>
+          <strong>Frete Grátis</strong>
+          <small>em compras acima de R$ 299,90</small>
+        </div>
+      </div>
+
+      <div class="beneficio">
+        <span class="beneficio__icon" aria-hidden="true">&#128737;</span>
+        <div>
+          <strong>Compra Segura</strong>
+          <small>seus dados protegidos</small>
+        </div>
+      </div>
+
+      <div class="beneficio">
+        <span class="beneficio__icon" aria-hidden="true">&#128179;</span>
+        <div>
+          <strong>Parcele em até 12x</strong>
+          <small>no cartão de crédito</small>
+        </div>
+      </div>
+
+      <div class="beneficio">
+        <span class="beneficio__icon" aria-hidden="true">&#127911;</span>
+        <div>
+          <strong>Suporte Especializado</strong>
+          <small>atendimento rápido e eficiente</small>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="produtos.js"></script>
+</body>
+</html>
