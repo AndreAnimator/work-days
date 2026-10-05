@@ -36,6 +36,12 @@ final class AuthController
         ]);
     }
 
+    public function updateProfile(Request $request, array $params): void
+    {
+        $user = $this->auth->updateProfile((int) $request->userId(), $request->body());
+        Response::json(['message' => 'Perfil atualizado com sucesso.', 'user' => $user]);
+    }
+
     public function logout(Request $request, array $params): void
     {
         $token = $request->bearerToken();

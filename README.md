@@ -41,6 +41,7 @@ O frontend pode ser aberto com Live Server (por exemplo, porta 5500) ou outro se
 - `POST /api/auth/register` — cria uma conta.
 - `POST /api/auth/login` — autentica.
 - `GET /api/auth/me` — retorna o usuário autenticado.
+- `PATCH /api/auth/me` — atualiza nome e e-mail do usuário autenticado.
 - `POST /api/auth/logout` — encerra o token atual.
 - `GET /api/cart` — retorna o carrinho autenticado.
 - `POST /api/cart/items` — adiciona produto ao carrinho.
@@ -64,11 +65,11 @@ Usuário admin criado pelo `db/schema.sql` (apenas desenvolvimento — troque a 
 
 | E-mail                | Senha         |
 |-----------------------|---------------|
-| `admin@sinucapro.com` | `senha-forte` |
+| `admin@sinucapro.com` | `Admin@12345` |
 
 ## Painel administrativo
 
-`frontend/admin.html` só exibe o painel depois que `GET /api/admin/check` responde 200. Sem token o usuário vai para o login; cliente vê "Acesso negado". O CRUD de produtos do painel consome estes endpoints, que **ainda precisam ser criados no backend** (todos com `Authenticate::class . ':admin'`):
+`frontend/admin.html` só exibe o painel depois que `GET /api/admin/check` responde 200. Sem token o usuário vai para o login; cliente vê "Acesso negado". O CRUD de produtos do painel consome estes endpoints, protegidos por `Authenticate::class . ':admin'` :
 
 - `GET /api/admin/products` — lista todos os produtos, inclusive inativos (campos: `id, name, description, category, price, image, stock, active`); aceita resposta `{ "products": [...] }`.
 - `POST /api/admin/products` — cria produto.

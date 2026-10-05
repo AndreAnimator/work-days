@@ -100,6 +100,41 @@ final class AuthService
         ];
     }
 
+    public function updateProfile(int $userId, array $data): array
+    {
+        $data = $this->trimFields($data, ['name', 'email']);
+
+        $v = new Validator($data);
+        $v->required('name', 'nome')
+          ->string('name', 'nome')
+          ->min('name', 3, 'nome')
+          ->max('name', 120, 'nome')
+          ->required('email', 'e-mail')
+          ->string('email', 'e-mail')
+          ->email('e-mail')
+          ->max('email', 180, 'e-mail');
+        $v->validate();
+
+        if ($this->users->emailExists($data['email'], $userId)) {
+            throw new HttpException(422, 'Dados inválidos.', self::EMAIL_TAKEN);
+        }
+
+        try {
+            $user = $this->users->updateProfile($userId, $data['name'], $data['email']);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23000' && ($e->errorInfo[1] ?? null) === 1062) {
+                throw new HttpException(422, 'Dados inválidos.', self::EMAIL_TAKEN);
+            }
+            throw $e;
+        }
+
+        if (!$user) {
+            throw new HttpException(404, 'Usuário não encontrado.');
+        }
+
+        return $user;
+    }
+
     /** Invalida o token: a linha é apagada do banco e ele deixa de valer na hora. */
     public function logout(string $plainToken): void
     {

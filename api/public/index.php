@@ -19,8 +19,12 @@ Cors::apply();
 // 3. TRATAMENTO DE ARQUIVOS ESTÁTICOS DO SERVIDO EMBUTIDO DO PHP
 if (PHP_SAPI === 'cli-server') {
     $requested = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-    $file = __DIR__ . $requested;
-    if ($requested !== '/' && is_file($file)) {
+    $candidate = realpath(__DIR__ . $requested);
+    $publicRoot = realpath(__DIR__);
+
+    if ($requested !== '/' && $candidate !== false && $publicRoot !== false
+        && str_starts_with($candidate, $publicRoot . DIRECTORY_SEPARATOR)
+        && is_file($candidate)) {
         return false;
     }
 }
@@ -33,11 +37,16 @@ $router->get('/api/products/{id}', [ProductController::class, 'show']);
 
 $router->post('/api/auth/register', [AuthController::class, 'register']);
 $router->post('/api/auth/login', [AuthController::class, 'login']);
+$router->patch('/api/auth/me', [AuthController::class, 'updateProfile'], [Authenticate::class]);
 $router->post('/api/auth/logout', [AuthController::class, 'logout'], [Authenticate::class]);
 $router->get('/api/auth/me', [AuthController::class, 'me'], [Authenticate::class]);
 
 // Área administrativa: ':admin' faz o Authenticate responder 403 para clientes.
 $router->get('/api/admin/check', [AdminController::class, 'check'], [Authenticate::class . ':admin']);
+$router->get('/api/admin/products', [AdminController::class, 'products'], [Authenticate::class . ':admin']);
+$router->post('/api/admin/products', [AdminController::class, 'store'], [Authenticate::class . ':admin']);
+$router->patch('/api/admin/products/{id}', [AdminController::class, 'update'], [Authenticate::class . ':admin']);
+$router->delete('/api/admin/products/{id}', [AdminController::class, 'delete'], [Authenticate::class . ':admin']);
 
 $router->get('/api/cart', [CartController::class, 'show'], [Authenticate::class]);
 $router->post('/api/cart/items', [CartController::class, 'addItem'], [Authenticate::class]);

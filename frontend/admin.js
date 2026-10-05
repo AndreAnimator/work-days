@@ -8,10 +8,10 @@
      GET    /api/admin/check            -> JÁ EXISTE no backend. Confirma o papel ADMIN no servidor.
      POST   /api/auth/logout            -> JÁ EXISTE no backend.
 
-     GET    /api/admin/products         -> A CRIAR no backend. Lista TODOS os produtos (inclusive inativos).
-     POST   /api/admin/products         -> A CRIAR no backend. Cria produto.
-     PATCH  /api/admin/products/{id}    -> A CRIAR no backend. Atualiza produto.
-     DELETE /api/admin/products/{id}    -> A CRIAR no backend. Exclui produto.
+     GET    /api/admin/products         -> Lista TODOS os produtos (inclusive inativos).
+     POST   /api/admin/products         -> Cria produto.
+     PATCH  /api/admin/products/{id}    -> Atualiza produto.
+     DELETE /api/admin/products/{id}    -> Exclui produto.
 
    Segurança: o que está no localStorage NÃO decide o acesso. O painel só é
    exibido depois que GET /api/admin/check responde 200 (cliente recebe 403,

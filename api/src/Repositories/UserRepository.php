@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Core\Database;
@@ -24,12 +26,19 @@ final class UserRepository
         return $stmt->fetch() ?: null;
     }
 
-    public function emailExists(string $email): bool
+    public function emailExists(string $email, ?int $exceptId = null): bool
     {
-        $stmt = Database::connection()->prepare(
-            'SELECT 1 FROM users WHERE email = :email LIMIT 1'
-        );
-        $stmt->execute(['email' => mb_strtolower($email)]);
+        $sql = 'SELECT 1 FROM users WHERE email = :email';
+        $params = ['email' => mb_strtolower($email)];
+
+        if ($exceptId !== null) {
+            $sql .= ' AND id <> :id';
+            $params['id'] = $exceptId;
+        }
+
+        $sql .= ' LIMIT 1';
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->execute($params);
         return (bool) $stmt->fetchColumn();
     }
 
@@ -39,20 +48,31 @@ final class UserRepository
 
         $stmt = $pdo->prepare(
             'INSERT INTO users (name, email, password, role, created_at, updated_at)
-            VALUES (:name, :email, :password, :role, NOW(), NOW())'
+             VALUES (:name, :email, :password, :role, NOW(), NOW())'
         );
-
         $stmt->execute([
-            'name'     => $data['name'],
-            'email'    => mb_strtolower($data['email']),
+            'name' => $data['name'],
+            'email' => mb_strtolower($data['email']),
             'password' => $data['password'],
-            'role'     => $data['role'] ?? 'cliente',
+            'role' => $data['role'] ?? 'cliente',
         ]);
 
-        $id = (int) $pdo->lastInsertId();
-
-        // findById já devolve sem o hash da senha
-        return $this->findById($id);
+        return $this->findById((int) $pdo->lastInsertId());
     }
 
+    public function updateProfile(int $id, string $name, string $email): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE users
+                SET name = :name, email = :email, updated_at = NOW()
+              WHERE id = :id'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'name' => $name,
+            'email' => mb_strtolower($email),
+        ]);
+
+        return $this->findById($id);
+    }
 }
