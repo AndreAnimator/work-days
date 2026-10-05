@@ -354,8 +354,17 @@ async function loadCartCount() {
 
 searchForm?.addEventListener('submit', (event) => {
   event.preventDefault();
-  loadProducts(searchInput?.value || '');
-  $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const term = searchInput?.value.trim() || '';
+  const url = new URL('produtos.html', window.location.href);
+
+  if (term) {
+    url.searchParams.set('q', term);
+  }
+
+  // A busca do cabeçalho sempre leva ao catálogo, onde os resultados
+  // podem ser refinados por categoria e ordenação.
+  window.location.href = url.href;
 });
 
 document.querySelectorAll('.cat').forEach((link) => {
