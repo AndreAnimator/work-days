@@ -44,11 +44,42 @@ O frontend pode ser aberto com Live Server (por exemplo, porta 5500) ou outro se
 - `POST /api/auth/register` — cria uma conta.
 - `POST /api/auth/login` — autentica.
 - `GET /api/auth/me` — retorna o usuário autenticado.
+- `PATCH /api/auth/me` — atualiza nome e e-mail do usuário autenticado.
 - `POST /api/auth/logout` — encerra o token atual.
 - `GET /api/cart` — retorna o carrinho autenticado.
 - `POST /api/cart/items` — adiciona produto ao carrinho.
 - `PATCH /api/cart/items/{productId}` — altera quantidade.
 - `DELETE /api/cart/items/{productId}` — remove produto.
+
+- `GET /api/admin/check` — **somente admin** (401 sem token, 403 para cliente). Usado pelo frontend para confirmar o papel no servidor.
+
+## Papéis e autorização
+
+Existem dois papéis: `cliente` (padrão em todo cadastro) e `admin`. O papel é lido do banco a cada requisição e nunca vem do corpo do cadastro.
+
+O middleware `Authenticate` aceita uma lista de papéis após `:`:
+
+```php
+[Authenticate::class]                 // qualquer usuário autenticado
+[Authenticate::class . ':admin']      // somente admin: cliente recebe 403
+```
+
+Usuário admin criado pelo `db/schema.sql` (apenas desenvolvimento — troque a senha fora do ambiente local):
+
+| E-mail                | Senha         |
+|-----------------------|---------------|
+| `admin@sinucapro.com` | `Admin@12345` |
+
+## Painel administrativo
+
+`frontend/admin.html` só exibe o painel depois que `GET /api/admin/check` responde 200. Sem token o usuário vai para o login; cliente vê "Acesso negado". O CRUD de produtos do painel consome estes endpoints, protegidos por `Authenticate::class . ':admin'` :
+
+- `GET /api/admin/products` — lista todos os produtos, inclusive inativos (campos: `id, name, description, category, price, image, stock, active`); aceita resposta `{ "products": [...] }`.
+- `POST /api/admin/products` — cria produto.
+- `PATCH /api/admin/products/{id}` — atualiza produto.
+- `DELETE /api/admin/products/{id}` — exclui produto.
+
+Corpo de `POST`/`PATCH`: `{ name, description, category, price, stock, image, active }`. Erros de validação devem seguir o formato `{ "message": "...", "errors": { "campo": ["..."] } }`.
 
 ## Banco de dados
 

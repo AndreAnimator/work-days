@@ -343,6 +343,27 @@
           <button type="submit" class="btn-login">Cadastrar</button>
         </form>
       </div>
+
+    </section>
+
+  </div>
+</main>
+
+<!-- Modal de Autenticação (Login / Cadastro) -->
+<div id="auth-modal" class="auth-modal hidden" aria-hidden="true">
+  <div id="auth-overlay" class="auth-overlay"></div>
+  <div class="auth-content login-card">
+    <button id="close-auth-btn" class="auth-close" aria-label="Fechar">&times;</button>
+    
+    <div class="login-header">
+      <div class="login-icon">龍</div>
+      <h2>Sinuca Pro</h2>
+      <p>Acesse sua conta para gerenciar seus pedidos</p>
+    </div>
+
+    <div class="auth-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #ddd;">
+      <button id="tab-login" class="tab-btn active" style="padding: 0.5rem 1rem; background: none; border: none; border-bottom: 2px solid #d4af37; font-weight: bold; cursor: pointer;">Entrar</button>
+      <button id="tab-register" class="tab-btn" style="padding: 0.5rem 1rem; background: none; border: none; cursor: pointer;">Cadastrar</button>
     </div>
 
     <footer class="beneficios">

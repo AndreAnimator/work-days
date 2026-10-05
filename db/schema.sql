@@ -65,6 +65,14 @@ CREATE TABLE IF NOT EXISTS cart_items (
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Usuário ADMIN inicial (somente para desenvolvimento).
+-- Login: admin@sinucapro.com | Senha: Admin@12345 (somente desenvolvimento).
+-- Troque a senha antes de qualquer uso fora do ambiente local.
+INSERT INTO users (name, email, password, role)
+SELECT 'Administrador', 'admin@sinucapro.com',
+       '$2y$12$.EZ0.6VlN0n5QmRBnrMwt.XluuBp8wwQWo9ZTqo8mCysYuC/IiJAm', 'admin'
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@sinucapro.com');
+
 INSERT INTO products (name, description, category, price, image, stock)
 SELECT 'Taco de madeira', 'Taco de sinuca padrão para uso recreativo e profissional.', 'Tacos', 99.99,
        'https://images.tcdn.com.br/img/img_prod/1157245/taco_de_sinuca_garfado_2_20260202191158_e4d1f0d7c907.jpg', 20

@@ -63,6 +63,76 @@ final class ProductRepository
         return $stmt->fetchAll();
     }
 
+    public function allForAdmin(): array
+    {
+        $stmt = Database::connection()->query(
+            'SELECT id, name, description, category, price, image, stock, active
+               FROM products
+              ORDER BY id DESC'
+        );
+        return $stmt->fetchAll();
+    }
+
+    public function create(array $data): array
+    {
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare(
+            'INSERT INTO products (name, description, category, price, image, stock, active)
+             VALUES (:name, :description, :category, :price, :image, :stock, :active)'
+        );
+        $stmt->execute([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'category' => $data['category'],
+            'price' => $data['price'],
+            'image' => $data['image'] ?? null,
+            'stock' => $data['stock'],
+            'active' => $data['active'] ?? true,
+        ]);
+
+        return $this->findAdmin((int) $pdo->lastInsertId());
+    }
+
+    public function update(int $id, array $data): ?array
+    {
+        if ($this->findAdmin($id) === null) return null;
+
+        $allowed = ['name', 'description', 'category', 'price', 'image', 'stock', 'active'];
+        $fields = [];
+        $params = ['id' => $id];
+
+        foreach ($allowed as $field) {
+            if (!array_key_exists($field, $data)) continue;
+            $fields[] = "{$field} = :{$field}";
+            $params[$field] = $data[$field];
+        }
+
+        if ($fields !== []) {
+            $sql = 'UPDATE products SET ' . implode(', ', $fields) . ' WHERE id = :id';
+            $stmt = Database::connection()->prepare($sql);
+            $stmt->execute($params);
+        }
+
+        return $this->findAdmin($id);
+    }
+
+    public function delete(int $id): bool
+    {
+        $stmt = Database::connection()->prepare('DELETE FROM products WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    private function findAdmin(int $id): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT id, name, description, category, price, image, stock, active
+               FROM products WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch() ?: null;
+    }
+
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(

@@ -1,30 +1,97 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Billiard Dinasty - Tudo para o seu jogo</title>
+  <title>Sinuca Pro - Tudo para o seu jogo</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@400;700;900&display=swap"
-      rel="stylesheet"
-    />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@400;700;900&display=swap"
+    rel="stylesheet"
+  >
 
-    <link rel="stylesheet" href="style.css" />
-  </head>
+  <link rel="stylesheet" href="style.css">
+</head>
 
-  <body>
-    <header class="header">
-      <div class="container header__inner">
-        <a href="#" class="logo">
-          <span class="logo__icon" aria-hidden="true">龍</span>
-          <span class="logo__text">
-            <strong>Billiard <em>Dinasty</em></strong>
-            <small>Tudo para o seu jogo</small>
-          </span>
+<body>
+
+  <header class="header">
+    <div class="container header__inner">
+
+      <a href="#" class="logo">
+        <span class="logo__icon" aria-hidden="true">S</span>
+        <span class="logo__text">
+          <strong>SINUCA <em>PRO</em></strong>
+          <small>Tudo para o seu jogo</small>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a href="#" class="active">Início</a>
+        <a href="#">Tacos</a>
+        <a href="#">Mesas</a>
+        <a href="#">Bolas</a>
+        <a href="#">Acessórios</a>
+        <a href="#">Maletas</a>
+        <a href="#">Ofertas</a>
+      </nav>
+
+      <form class="search" id="search-form" role="search">
+        <input
+          type="search"
+          id="busca"
+          placeholder="Buscar produtos..."
+          aria-label="Buscar produtos"
+        >
+        <button type="submit" aria-label="Buscar">&#9906;</button>
+      </form>
+
+      <div class="header__actions">
+        <!-- NOVO: link direto para a página de perfil -->
+        <a href="perfil.html" class="icon-btn" aria-label="Minha conta">&#9787;</a>
+
+        <a href="#" class="icon-btn cart" aria-label="Carrinho">
+          &#128722;
+          <span class="cart__count" id="cart-count">0</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <button
+        class="hero__arrow hero__arrow--prev"
+        aria-label="Anterior"
+        type="button"
+      >
+        &#10094;
+      </button>
+
+      <div class="container hero__content">
+        <p class="hero__eyebrow">
+          Qualidade &bull; Tradição &bull; Honra
+        </p>
+
+        <h1>
+          A arte da sinuca,<br>
+          <span>digna de uma dinastia</span>
+        </h1>
+
+        <p class="hero__text">
+          Tacos, mesas, bolas, giz, triângulos, maletas e muito mais.
+          Equipamentos escolhidos com rigor para você jogar como um mestre
+          ou apenas reunir os amigos à mesa.
+        </p>
+
+        <a href="#destaques" class="btn btn--primary">
+          Ver produtos &rarr;
         </a>
 
         <nav class="nav" aria-label="Principal">
@@ -123,6 +190,26 @@
         class="container categorias"
         id="categorias"
         aria-label="Categorias"
+    </div>
+  </footer>
+
+  <!-- ===================================================== -->
+  <!-- MODAL DE AUTENTICAÇÃO - SPA                           -->
+  <!-- ===================================================== -->
+  <div id="auth-modal" class="auth-modal hidden" aria-hidden="true">
+    <div class="auth-modal__overlay" id="auth-overlay"></div>
+
+    <div
+      class="auth-modal__content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-title"
+    >
+      <button
+        class="auth-modal__close"
+        id="close-auth-btn"
+        type="button"
+        aria-label="Fechar"
       >
         <a href="produtos.html?c=tacos" class="cat">
           <div class="cat__img"></div>
@@ -345,6 +432,8 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
-  </body>
+  <script src="script.js"></script>
+  <script src="cards.js"></script>
+
+</body>
 </html>

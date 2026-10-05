@@ -16,6 +16,25 @@ final class Validator
         return $this;
     }
 
+    /** Garante que o valor, se enviado, seja texto (evita arrays/objetos no JSON). */
+    public function string(string $field, string $label): self
+    {
+        $v = $this->data[$field] ?? null;
+        if ($v !== null && !is_string($v)) {
+            $this->errors[$field][] = "O campo {$label} deve ser um texto.";
+        }
+        return $this;
+    }
+
+    public function max(string $field, int $max, string $label): self
+    {
+        $v = $this->data[$field] ?? null;
+        if (is_string($v) && mb_strlen($v) > $max) {
+            $this->errors[$field][] = "O campo {$label} deve ter no máximo {$max} caracteres.";
+        }
+        return $this;
+    }
+
     public function email(string $field, string $label = 'e-mail'): self
     {
         $v = $this->data[$field] ?? null;
@@ -38,8 +57,89 @@ final class Validator
     {
         $a = $this->data[$field] ?? null;
         $b = $this->data[$confirmationField] ?? null;
+
+        // Confirmação ausente já é reportada por required(); evita mensagem duplicada.
+        if ($b === null || $b === '') {
+            return $this;
+        }
+
         if ($a !== $b) {
             $this->errors[$confirmationField][] = "A confirmação de {$label} não confere.";
+        }
+        return $this;
+    }
+
+    public function integer(string $field, string $label, ?int $min = null, ?int $max = null): self
+    {
+        $v = $this->data[$field] ?? null;
+        if ($v === null || $v === '') return $this;
+
+        $valid = filter_var($v, FILTER_VALIDATE_INT) !== false;
+        if (!$valid) {
+            $this->errors[$field][] = "O campo {$label} deve ser um número inteiro.";
+            return $this;
+        }
+
+        $number = (int) $v;
+        if ($min !== null && $number < $min) {
+            $this->errors[$field][] = "O campo {$label} deve ser no mínimo {$min}.";
+        }
+        if ($max !== null && $number > $max) {
+            $this->errors[$field][] = "O campo {$label} deve ser no máximo {$max}.";
+        }
+        return $this;
+    }
+
+    public function decimal(string $field, string $label, float $min = 0, ?float $max = null, int $scale = 2): self
+    {
+        $v = $this->data[$field] ?? null;
+        if ($v === null || $v === '') return $this;
+
+        if (!is_int($v) && !is_float($v) && !is_string($v)) {
+            $this->errors[$field][] = "O campo {$label} deve ser numérico.";
+            return $this;
+        }
+
+        $normalized = is_string($v) ? str_replace(',', '.', trim($v)) : (string) $v;
+        if (!preg_match('/^\d+(?:\.\d+)?$/', $normalized)) {
+            $this->errors[$field][] = "O campo {$label} deve ser numérico.";
+            return $this;
+        }
+
+        if (str_contains($normalized, '.')) {
+            $decimals = strlen($normalized) - strpos($normalized, '.') - 1;
+            if ($decimals > $scale) {
+                $this->errors[$field][] = "O campo {$label} deve ter no máximo {$scale} casas decimais.";
+                return $this;
+            }
+        }
+
+        $number = (float) $normalized;
+        if ($number < $min) {
+            $this->errors[$field][] = "O campo {$label} deve ser no mínimo {$min}.";
+        }
+        if ($max !== null && $number > $max) {
+            $this->errors[$field][] = "O campo {$label} deve ser no máximo {$max}.";
+        }
+        return $this;
+    }
+
+    public function boolean(string $field, string $label): self
+    {
+        $v = $this->data[$field] ?? null;
+        if ($v === null) return $this;
+        if (!is_bool($v) && !in_array($v, [0, 1, '0', '1'], true)) {
+            $this->errors[$field][] = "O campo {$label} deve ser booleano.";
+        }
+        return $this;
+    }
+
+    public function url(string $field, string $label): self
+    {
+        $v = $this->data[$field] ?? null;
+        if ($v === null || $v === '') return $this;
+        if (!filter_var($v, FILTER_VALIDATE_URL) || !preg_match('/^https?:\/\//i', $v)) {
+            $this->errors[$field][] = "O campo {$label} deve conter uma URL http(s) válida.";
         }
         return $this;
     }
