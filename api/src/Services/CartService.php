@@ -55,9 +55,17 @@ final class CartService
             }
 
             $desired = $current + $quantity;
-            $final   = min($desired, (int) $product['stock']);
+            $stock = (int) $product['stock'];
 
-            $this->carts->upsertItem((int) $cart['id'], $productId, $final, $pdo);
+            if ($desired > $stock) {
+                throw new HttpException(422, 'Quantidade acima do estoque.', [
+                    'quantity' => [
+                        'Só há ' . $stock . ' unidade(s) em estoque e o carrinho já possui ' . $current . '.',
+                    ],
+                ]);
+            }
+
+            $this->carts->upsertItem((int) $cart['id'], $productId, $desired, $pdo);
 
             $items = $this->carts->items((int) $cart['id'], $pdo);
             return $this->formatCart($cart, $items);

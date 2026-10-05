@@ -1,25 +1,41 @@
-const API_URL = 'http://localhost:8000/api/auth';
+'use strict';
 
-const authModal = document.getElementById('auth-modal');
-const authOverlay = document.getElementById('auth-overlay');
-const closeAuthBtn = document.getElementById('close-auth-btn');
-const accountBtn = document.getElementById('account-btn');
+const API_URL = 'http://127.0.0.1:8000';
 
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('register-form');
+const $ = (id) => document.getElementById(id);
 
-const tabLogin = document.getElementById('tab-login');
-const tabRegister = document.getElementById('tab-register');
+const authModal = $('auth-modal');
+const authOverlay = $('auth-overlay');
+const closeAuthBtn = $('close-auth-btn');
+const authContent = document.querySelector('.auth-modal__content');
 
-const loginMessage = document.getElementById('login-message');
-const registerMessage = document.getElementById('register-message');
+const loginForm = $('login-form');
+const registerForm = $('register-form');
+const tabLogin = $('tab-login');
+const tabRegister = $('tab-register');
+const loginMessage = $('login-message');
+const registerMessage = $('register-message');
+const productsEl = $('produtos');
+const searchForm = $('search-form');
+const searchInput = $('busca');
+const cartCountEl = $('cart-count');
 
-const searchForm = document.getElementById('search-form');
+const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+class ApiError extends Error {
+  constructor(status, message, errors = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.errors = errors;
+  }
+}
 
 function showMessage(element, message, type = 'error') {
   if (!element) return;
   element.textContent = message;
   element.className = `auth-message ${type}`;
+  element.style.display = message ? 'block' : 'none';
 }
 
 function clearMessages() {
@@ -27,354 +43,384 @@ function clearMessages() {
   showMessage(registerMessage, '');
 }
 
-function setButtonLoading(button, loading, loadingText, normalText) {
-  if (!button) return;
-  button.disabled = loading;
-  button.textContent = loading ? loadingText : normalText;
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
 }
 
+function clearSession() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('token_expires_at');
+}
+
+async function api(path, { method = 'GET', body, auth = false } = {}) {
+  const headers = { Accept: 'application/json' };
+  const token = localStorage.getItem('token');
+
+  if (auth && token) headers.Authorization = `Bearer ${token}`;
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError(0, 'Não foi possível conectar ao servidor.');
+  }
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    // Algumas respostas válidas podem não possuir corpo.
+  }
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      data?.message || `Erro inesperado (HTTP ${response.status}).`,
+      data?.errors || {},
+    );
+  }
+
+  return data;
+}
+
+/* ========================= Autenticação ========================= */
 function openAuthModal() {
   if (!authModal) return;
-
   authModal.classList.remove('hidden');
   authModal.setAttribute('aria-hidden', 'false');
-
   showLogin();
-
-  setTimeout(() => {
-    document.getElementById('login-email')?.focus();
-  }, 50);
 }
 
 function closeAuthModal() {
   if (!authModal) return;
-
   authModal.classList.add('hidden');
   authModal.setAttribute('aria-hidden', 'true');
-
   clearMessages();
 }
-
-if (accountBtn) {
-  accountBtn.addEventListener('click', (event) => {
-    event.preventDefault();
-    openAuthModal();
-  });
-}
-
-if (closeAuthBtn) {
-  closeAuthBtn.addEventListener('click', closeAuthModal);
-}
-
-if (authOverlay) {
-  authOverlay.addEventListener('click', closeAuthModal);
-}
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    closeAuthModal();
-  }
-});
 
 function showLogin() {
   loginForm?.classList.remove('hidden');
   registerForm?.classList.add('hidden');
-
   tabLogin?.classList.add('active');
   tabRegister?.classList.remove('active');
-
   clearMessages();
 }
 
 function showRegister() {
   loginForm?.classList.add('hidden');
   registerForm?.classList.remove('hidden');
-
   tabLogin?.classList.remove('active');
   tabRegister?.classList.add('active');
-
   clearMessages();
-
-  setTimeout(() => {
-    document.getElementById('register-name')?.focus();
-  }, 50);
 }
 
+closeAuthBtn?.addEventListener('click', closeAuthModal);
+authOverlay?.addEventListener('click', closeAuthModal);
+authContent?.addEventListener('click', (event) => event.stopPropagation());
 tabLogin?.addEventListener('click', showLogin);
 tabRegister?.addEventListener('click', showRegister);
 
-async function parseResponse(response) {
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('application/json')) {
-    return await response.json();
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && authModal && !authModal.classList.contains('hidden')) {
+    closeAuthModal();
   }
-
-  const text = await response.text();
-
-  return {
-    message: text || 'Resposta inválida do servidor.'
-  };
-}
-
-function getApiErrorMessage(data) {
-  if (!data) {
-    return 'Ocorreu um erro inesperado.';
-  }
-
-  if (data.message) {
-    return data.message;
-  }
-
-  if (data.errors) {
-    const errors = data.errors;
-    return Object.values(errors).flat().join(' ');
-  }
-
-  return 'Não foi possível concluir a operação.';
-}
+});
 
 loginForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
-
   clearMessages();
 
-  const emailInput = document.getElementById('login-email');
-  const passwordInput = document.getElementById('login-password');
-  const submitButton = loginForm.querySelector('button[type="submit"]');
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-
-  if (!email || !password) {
-    showMessage(loginMessage, 'Preencha o e-mail e a senha.');
-    return;
-  }
-
-  setButtonLoading(submitButton, true, 'Entrando...', 'Entrar');
+  const email = $('login-email')?.value.trim() || '';
+  const password = $('login-password')?.value || '';
 
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const data = await api('/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
+      body: { email, password },
     });
 
-    const data = await parseResponse(response);
+    if (data?.token) localStorage.setItem('token', data.token);
+    if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+    if (data?.expires_at) localStorage.setItem('token_expires_at', data.expires_at);
 
-    if (!response.ok) {
-      showMessage(loginMessage, getApiErrorMessage(data));
-      return;
-    }
-
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    if (data.expires_at) {
-      localStorage.setItem('token_expires_at', data.expires_at);
-    }
-
-    showMessage(loginMessage, 'Login realizado com sucesso!', 'success');
-
-    setTimeout(() => {
-      closeAuthModal();
-    }, 500);
-
+    showMessage(loginMessage, 'Login realizado! Carregando...', 'success');
+    setTimeout(() => window.location.reload(), 500);
   } catch (error) {
-    console.error('Erro ao realizar login:', error);
-    showMessage(
-      loginMessage,
-      'Não foi possível conectar ao servidor. Verifique se a API está funcionando.'
-    );
-  } finally {
-    setButtonLoading(submitButton, false, 'Entrando...', 'Entrar');
+    showMessage(loginMessage, error.message || 'E-mail ou senha inválidos.');
   }
 });
 
 registerForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
-
   clearMessages();
 
-  const nameInput = document.getElementById('register-name');
-  const emailInput = document.getElementById('register-email');
-  const passwordInput = document.getElementById('register-password');
-  const confirmationInput = document.getElementById('register-password-confirmation');
-
-  const submitButton = registerForm.querySelector('button[type="submit"]');
-
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-  const passwordConfirmation = confirmationInput.value;
-
-  // Validações do frontend
-  if (name.length < 3) {
-    showMessage(registerMessage, 'O nome deve possuir pelo menos 3 caracteres.');
-    nameInput.focus();
-    return;
-  }
-
-  if (!email) {
-    showMessage(registerMessage, 'Informe um e-mail válido.');
-    emailInput.focus();
-    return;
-  }
-
-  if (password.length < 8) {
-    showMessage(registerMessage, 'A senha deve possuir pelo menos 8 caracteres.');
-    passwordInput.focus();
-    return;
-  }
+  const name = $('register-name')?.value.trim() || '';
+  const email = $('register-email')?.value.trim() || '';
+  const password = $('register-password')?.value || '';
+  const passwordConfirmation = $('register-password-confirmation')?.value || '';
 
   if (password !== passwordConfirmation) {
-    showMessage(registerMessage, 'As senhas não são iguais.');
-    confirmationInput.focus();
+    showMessage(registerMessage, 'As senhas não coincidem.');
     return;
   }
 
-  setButtonLoading(submitButton, true, 'Cadastrando...', 'Cadastrar');
-
   try {
-    const response = await fetch(`${API_URL}/register`, {
+    const data = await api('/api/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        password_confirmation: passwordConfirmation
-      })
+      body: { name, email, password, password_confirmation: passwordConfirmation },
     });
 
-    const data = await parseResponse(response);
+    if (data?.token) localStorage.setItem('token', data.token);
+    if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+    if (data?.expires_at) localStorage.setItem('token_expires_at', data.expires_at);
 
-    if (!response.ok) {
-      showMessage(registerMessage, getApiErrorMessage(data));
-      return;
-    }
-
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    if (data.expires_at) {
-      localStorage.setItem('token_expires_at', data.expires_at);
-    }
-
-    showMessage(registerMessage, 'Cadastro realizado com sucesso!', 'success');
-
-    // Depois do cadastro, abre a aba de login.
-    // Como a API já devolveu token, o usuário também permanece autenticado.
-    setTimeout(() => {
-      showLogin();
-      loginForm.reset();
-
-      if (emailInput.value) {
-        document.getElementById('login-email').value = emailInput.value;
-      }
-    }, 700);
-
+    showMessage(registerMessage, 'Cadastro realizado! Entrando...', 'success');
+    setTimeout(() => window.location.reload(), 500);
   } catch (error) {
-    console.error('Erro ao realizar cadastro:', error);
-    showMessage(
-      registerMessage,
-      'Não foi possível conectar ao servidor. Verifique se a API está funcionando.'
-    );
-  } finally {
-    setButtonLoading(submitButton, false, 'Cadastrando...', 'Cadastrar');
+    const firstFieldError = Object.values(error.errors || {})[0]?.[0];
+    showMessage(registerMessage, firstFieldError || error.message || 'Erro ao realizar cadastro.');
   }
 });
 
 async function logout() {
   const token = localStorage.getItem('token');
-
-  if (!token) return;
+  if (!token) {
+    clearSession();
+    return;
+  }
 
   try {
-    await fetch(`${API_URL}/logout`, {
+    await fetch(`${API_URL}/api/auth/logout`, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
     });
   } catch (error) {
-    console.error('Erro ao encerrar sessão:', error);
+    console.warn('Não foi possível invalidar o token no servidor:', error);
   } finally {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('token_expires_at');
+    clearSession();
   }
 }
 
-window.logout = logout;
+/* ========================= Catálogo ========================= */
+function safeImageUrl(value) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
 
-async function checkAuth() {
-  const token = localStorage.getItem('token');
+function productCard(product) {
+  const card = document.createElement('article');
+  card.className = 'produto-card';
 
-  if (!token) return null;
+  const imageWrap = document.createElement('div');
+  imageWrap.className = 'produto-card__img';
+  const src = safeImageUrl(product.image);
+  if (src) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = product.name;
+    img.loading = 'lazy';
+    img.addEventListener('error', () => imageWrap.replaceChildren());
+    imageWrap.append(img);
+  } else {
+    imageWrap.textContent = 'Sem imagem';
+  }
+
+  const name = document.createElement('h3');
+  name.className = 'produto-card__nome';
+  name.textContent = product.name;
+
+  const description = document.createElement('p');
+  description.className = 'produto-card__desc';
+  description.textContent = product.description || 'Produto de qualidade para seu jogo.';
+
+  const price = document.createElement('div');
+  price.className = 'produto-card__preco';
+  price.textContent = brl.format(Number(product.price));
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'produto-card__btn';
+  button.textContent = Number(product.stock) > 0 ? 'Adicionar ao carrinho' : 'Sem estoque';
+  button.disabled = Number(product.stock) <= 0;
+  button.addEventListener('click', () => addToCart(product.id, button));
+
+  card.append(imageWrap, name, description, price, button);
+  return card;
+}
+
+function renderProducts(products) {
+  if (!productsEl) return;
+  productsEl.replaceChildren();
+
+  if (!products.length) {
+    const empty = document.createElement('p');
+    empty.className = 'produto-card__desc';
+    empty.textContent = 'Nenhum produto encontrado.';
+    productsEl.append(empty);
+    return;
+  }
+
+  products.forEach((product) => productsEl.append(productCard(product)));
+}
+
+async function loadProducts(search = '') {
+  if (!productsEl) return;
+  productsEl.replaceChildren();
+
+  const loading = document.createElement('p');
+  loading.className = 'produto-card__desc';
+  loading.textContent = 'Carregando produtos…';
+  productsEl.append(loading);
 
   try {
-    const response = await fetch(`${API_URL}/me`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token_expires_at');
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (data.user) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-    }
-
-    return data.user || null;
+    const query = search.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
+    const data = await api(`/api/products${query}`);
+    renderProducts(Array.isArray(data?.products) ? data.products : []);
   } catch (error) {
-    console.error('Não foi possível verificar a sessão:', error);
-    return null;
+    productsEl.replaceChildren();
+    const message = document.createElement('p');
+    message.className = 'produto-card__desc';
+    message.textContent = error.message || 'Não foi possível carregar os produtos.';
+    productsEl.append(message);
+  }
+}
+
+async function addToCart(productId, button) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    openAuthModal();
+    return;
+  }
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Adicionando…';
+
+  try {
+    const data = await api('/api/cart/items', {
+      method: 'POST',
+      auth: true,
+      body: { product_id: productId, quantity: 1 },
+    });
+    updateCartCount(data);
+    button.textContent = 'Adicionado ✓';
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 900);
+  } catch (error) {
+    if (error.status === 401) {
+      clearSession();
+      openAuthModal();
+    } else {
+      alert(error.message || 'Não foi possível adicionar o produto.');
+    }
+    button.textContent = originalText;
+    button.disabled = false;
+  }
+}
+
+function updateCartCount(cart) {
+  if (!cartCountEl || !cart) return;
+  const count = Number(cart.items_count || 0);
+  cartCountEl.textContent = String(Number.isFinite(count) ? count : 0);
+}
+
+async function loadCartCount() {
+  if (!localStorage.getItem('token') || !cartCountEl) return;
+  try {
+    const cart = await api('/api/cart', { auth: true });
+    updateCartCount(cart);
+  } catch (error) {
+    if (error.status === 401) clearSession();
   }
 }
 
 searchForm?.addEventListener('submit', (event) => {
   event.preventDefault();
-
-  const searchInput = document.getElementById('busca');
-  const term = searchInput.value.trim();
-
-  if (!term) return;
-
-  console.log('Busca:', term);
-
+  loadProducts(searchInput?.value || '');
+  $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+document.querySelectorAll('.cat').forEach((link) => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    const category = link.querySelector('h3')?.textContent.trim() || '';
+    if (searchInput) searchInput.value = category;
+    loadProducts(category);
+    $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+document.querySelector('.cart')?.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (!localStorage.getItem('token')) openAuthModal();
+});
+
+/* ========================= Usuário / navegação ========================= */
+function syncAdminLink(user) {
+  const actions = document.querySelector('.header__actions');
+  if (!actions) return;
+
+  const existing = actions.querySelector('[data-admin-link]');
+  const isAdmin = Boolean(localStorage.getItem('token')) && user?.role === 'admin';
+
+  if (!isAdmin) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+
+  const link = document.createElement('a');
+  link.href = 'admin.html';
+  link.className = 'icon-btn';
+  link.dataset.adminLink = '';
+  link.title = 'Painel administrativo';
+  link.setAttribute('aria-label', 'Painel administrativo');
+  link.textContent = '⚙';
+  actions.prepend(link);
+}
+
+async function syncUserFromServer() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const data = await api('/api/auth/me', { auth: true });
+    if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+  } catch (error) {
+    if (error.status === 401) clearSession();
+  }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = await checkAuth();
+  syncAdminLink(readStoredUser());
+  await syncUserFromServer();
+  syncAdminLink(readStoredUser());
 
-  if (user) {
-    console.log(`Usuário autenticado: ${user.name}`);
+  await Promise.all([loadProducts(), loadCartCount()]);
+
+  if (!localStorage.getItem('token') && new URLSearchParams(window.location.search).get('login') === '1') {
+    openAuthModal();
   }
 });
+
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.logout = logout;

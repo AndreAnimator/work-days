@@ -1,31 +1,37 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-use App\Core\Database;
+use App\Core\HttpException;
 use App\Core\Request;
 use App\Core\Response;
+use App\Repositories\ProductRepository;
 
 final class ProductController
 {
-    /** GET /api/products  (opcional: ?category=Giz) */
+    public function __construct(
+        private ProductRepository $products = new ProductRepository(),
+    ) {}
+
     public function index(Request $request, array $params): void
     {
-        $sql  = 'SELECT id, name, description, price, image, category, stock
-                   FROM products
-                  WHERE active = 1';
-        $bind = [];
+        $products = $this->products->all(
+            $request->query('search'),
+            $request->query('category'),
+        );
 
-        $category = $request->query('category');
-        if ($category) {
-            $sql .= ' AND category = :category';
-            $bind['category'] = $category;
+        Response::json(['products' => $products]);
+    }
+
+    public function show(Request $request, array $params): void
+    {
+        $product = $this->products->find((int) $params['id']);
+
+        if (!$product) {
+            throw new HttpException(404, 'Produto não encontrado.');
         }
 
-        $sql .= ' ORDER BY id ASC';
-
-        $stmt = Database::connection()->prepare($sql);
-        $stmt->execute($bind);
-
-        Response::json($stmt->fetchAll());
+        Response::json(['product' => $product]);
     }
 }

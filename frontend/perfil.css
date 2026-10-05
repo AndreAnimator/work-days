@@ -1,0 +1,349 @@
+/* ==========================================================================
+   1. ESTILOS DO MODAL DE AUTENTICAÇÃO (LOGIN / CADASTRO)
+   ========================================================================== */
+
+/* Classe utilitária para esconder elementos */
+.hidden {
+  display: none !important;
+}
+
+/* Container do Modal: Cobre a tela inteira e centraliza o card */
+.auth-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fundo Escuro Semi-transparente (Overlay) */
+.auth-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1;
+}
+
+/* Caixa/Card Central do Modal */
+.auth-content {
+  position: relative;
+  z-index: 2; /* Garante que fique acima da camada de escurecimento */
+  background: #ffffff;
+  width: 90%;
+  max-width: 420px;
+  padding: 2.5rem 2rem 2rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e2d8c3;
+  box-sizing: border-box;
+}
+
+/* Botão Fechar (X) */
+.auth-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #666666;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.auth-close:hover {
+  color: #580c1f;
+}
+
+/* Cabeçalho do Modal */
+.login-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-icon {
+  font-size: 2.5rem;
+  color: #d4af37;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #333333;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.login-header p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+  color: #666666;
+}
+
+/* Botão de Envio (Entrar / Cadastrar) */
+.btn-login {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #580c1f;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-login:hover {
+  background-color: #3d0815;
+}
+
+.btn-login:disabled {
+  background-color: #999999;
+  cursor: not-allowed;
+}
+
+/* Mensagens de Erro/Alerta no Modal */
+.login-alert {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.login-alert.error {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+  border: 1px solid #f8b4b4;
+}
+
+.login-alert.success {
+  background-color: #def7ec;
+  color: #03543f;
+  border: 1px solid #84e1bc;
+}
+
+
+/* ==========================================================================
+   2. ESTRUTURA PRINCIPAL DA PÁGINA DE PERFIL
+   ========================================================================== */
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  padding: 3rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar do Perfil
+   -------------------------------------------------------------------------- */
+.profile-sidebar {
+  background: #ffffff;
+  border: 1px solid #e2d8c3;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  height: fit-content;
+}
+
+.profile-avatar {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1.5rem;
+}
+
+.profile-avatar__circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #580c1f;
+  color: #d4af37;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem auto;
+  border: 2px solid #d4af37;
+}
+
+.profile-avatar__name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #333333;
+  margin: 0;
+}
+
+.profile-avatar__role {
+  font-size: 0.85rem;
+  color: #777777;
+}
+
+/* Menu de Navegação Lateral */
+.profile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #444444;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.profile-menu__item:hover,
+.profile-menu__item.active {
+  background-color: #580c1f;
+  color: #ffffff;
+}
+
+.profile-menu__item.active {
+  border-left: 4px solid #d4af37;
+}
+
+.profile-menu__item--logout {
+  color: #b30000;
+  margin-top: 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.profile-menu__item--logout:hover {
+  background-color: #fff0f0;
+  color: #d90000;
+}
+
+/* --------------------------------------------------------------------------
+   Conteúdo Principal do Perfil
+   -------------------------------------------------------------------------- */
+.profile-content {
+  background: #ffffff;
+  border: 1px solid #e2d8c3;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.profile-section-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.5rem;
+  color: #580c1f;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #d4af37;
+}
+
+/* Formulários */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #444444;
+}
+
+.form-group input {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #580c1f;
+  box-shadow: 0 0 0 2px rgba(88, 12, 31, 0.1);
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.link-forgot {
+  font-size: 0.8rem;
+  color: #580c1f;
+  text-decoration: none;
+}
+
+.link-forgot:hover {
+  text-decoration: underline;
+}
+
+/* Tabela de Pedidos */
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.orders-table th, 
+.orders-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eeeeee;
+  font-size: 0.9rem;
+}
+
+.orders-table th {
+  background-color: #f9f6f0;
+  color: #580c1f;
+  font-weight: 700;
+}
+
+.status-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-tag--delivered { 
+  background: #e6f4ea; 
+  color: #137333; 
+}
+
+.status-tag--processing { 
+  background: #fef7e0; 
+  color: #b06000; 
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
