@@ -358,16 +358,6 @@ searchForm?.addEventListener('submit', (event) => {
   $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
-document.querySelectorAll('.cat').forEach((link) => {
-  link.addEventListener('click', (event) => {
-    event.preventDefault();
-    const category = link.querySelector('h3')?.textContent.trim() || '';
-    if (searchInput) searchInput.value = category;
-    loadProducts(category);
-    $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-});
-
 document.querySelector('.cart')?.addEventListener('click', (event) => {
   event.preventDefault();
   if (!localStorage.getItem('token')) openAuthModal();
