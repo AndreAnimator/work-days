@@ -358,15 +358,7 @@ searchForm?.addEventListener('submit', (event) => {
   $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
-document.querySelectorAll('.cat').forEach((link) => {
-  link.addEventListener('click', (event) => {
-    event.preventDefault();
-    const category = link.querySelector('h3')?.textContent.trim() || '';
-    if (searchInput) searchInput.value = category;
-    loadProducts(category);
-    $('destaques')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-});
+
 
 document.querySelector('.cart')?.addEventListener('click', (event) => {
   event.preventDefault();
@@ -424,3 +416,143 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;
 window.logout = logout;
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  // ==========================================
+  // CARROSSEL / BANNER HERO
+  // ==========================================
+  const heroSection = document.getElementById("hero");
+
+  if (heroSection) {
+    const btnPrev = heroSection.querySelector(".hero__arrow--prev");
+    const btnNext = heroSection.querySelector(".hero__arrow--next");
+    const dots = heroSection.querySelectorAll(".hero__dots button");
+
+    // Conteúdos para os slides do Banner
+    const slidesData = [
+      {
+        eyebrow: "Qualidade • Tradição • Honra",
+        title: "A arte da sinuca,<br><span>digna de uma dinastia</span>",
+        text: "Tacos, mesas, bolas, giz, triângulos, maletas e muito mais. Equipamentos escolhidos com rigor para você jogar como um mestre ou apenas reunir os amigos à mesa.",
+        btnText: "Ver produtos &rarr;",
+        btnLink: "produtos.html"
+      },
+      {
+        eyebrow: "Lançamento • Exclusividade",
+        title: "Tacos Profissionais<br><span>de Alta Precisão</span>",
+        text: "Feitos com madeiras nobres selecionadas para garantir o equilíbrio perfeito e máxima estabilidade em cada tacada.",
+        btnText: "Conhecer Tacos &rarr;",
+        btnLink: "produtos.html?c=tacos"
+      },
+      {
+        eyebrow: "Sob Medida • Elegância",
+        title: "Mesas Oficiais<br><span>para a Sua Casa</span>",
+        text: "Transforme o seu espaço de lazer com mesas acabadas à mão, pedra ardósia polida e tecido de altíssima durabilidade.",
+        btnText: "Ver Mesas &rarr;",
+        btnLink: "produtos.html?c=mesas"
+      }
+    ];
+
+    let currentSlide = 0;
+    let autoSlideInterval = null;
+
+    // Seleciona os elementos do HTML que vão mudar
+    const eyebrowEl = heroSection.querySelector(".hero__eyebrow");
+    const titleEl = heroSection.querySelector("h1");
+    const textEl = heroSection.querySelector(".hero__text");
+    const btnEl = heroSection.querySelector(".btn--primary");
+
+    // Função para atualizar o slide na tela
+    function updateSlide(index) {
+      currentSlide = index;
+
+      // Animação suave de saída
+      const contentBox = heroSection.querySelector(".hero__content");
+      if (contentBox) {
+        contentBox.style.opacity = "0";
+        contentBox.style.transform = "translateY(5px)";
+        contentBox.style.transition = "all 0.25s ease";
+      }
+
+      setTimeout(() => {
+        // Atualiza os textos do slide
+        const data = slidesData[currentSlide];
+        if (eyebrowEl) eyebrowEl.innerHTML = data.eyebrow;
+        if (titleEl) titleEl.innerHTML = data.title;
+        if (textEl) textEl.innerHTML = data.text;
+        if (btnEl) {
+          btnEl.innerHTML = data.btnText;
+          btnEl.setAttribute("href", data.btnLink);
+        }
+
+        // Atualiza os pontos (dots)
+        dots.forEach((dot, idx) => {
+          if (idx === currentSlide) {
+            dot.classList.add("active");
+          } else {
+            dot.classList.remove("active");
+          }
+        });
+
+        // Animação suave de entrada
+        if (contentBox) {
+          contentBox.style.opacity = "1";
+          contentBox.style.transform = "translateY(0)";
+        }
+      }, 250);
+    }
+
+    function nextSlide() {
+      const nextIndex = (currentSlide + 1) % slidesData.length;
+      updateSlide(nextIndex);
+    }
+
+    function prevSlide() {
+      const prevIndex = (currentSlide - 1 + slidesData.length) % slidesData.length;
+      updateSlide(prevIndex);
+    }
+
+    // Iniciar temporizador automático (muda a cada 5 segundos)
+    function startAutoSlide() {
+      stopAutoSlide();
+      autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+
+    function stopAutoSlide() {
+      if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+      }
+    }
+
+    // Eventos das Setas
+    if (btnNext) {
+      btnNext.addEventListener("click", () => {
+        nextSlide();
+        startAutoSlide(); // Reinicia o tempo ao clicar
+      });
+    }
+
+    if (btnPrev) {
+      btnPrev.addEventListener("click", () => {
+        prevSlide();
+        startAutoSlide(); // Reinicia o tempo ao clicar
+      });
+    }
+
+    // Eventos dos Pontos (Dots)
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        updateSlide(index);
+        startAutoSlide();
+      });
+    });
+
+    // Pausa o carrossel se o utilizador passar o rato por cima
+    heroSection.addEventListener("mouseenter", stopAutoSlide);
+    heroSection.addEventListener("mouseleave", startAutoSlide);
+
+    // Iniciar
+    startAutoSlide();
+  }
+});

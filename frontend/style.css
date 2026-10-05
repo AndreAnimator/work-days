@@ -363,7 +363,23 @@ h3,
 
 .cat__img {
   height: 120px;
-  background: #efe3c6 center/contain no-repeat;
+  width: 100%;
+  display: block;
+  overflow: hidden;
+  padding: 0; /* Remova o padding para a imagem encostar nas bordas */
+}
+
+.cat__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Força a imagem a preencher todo o espaço disponível */
+  object-position: center; /* Centraliza a imagem antes de cortar os excessos */
+  transition: transform 0.2s ease;
+}
+
+/* Mantém o efeito visual ao passar o mouse */
+.cat:hover .cat__img img {
+  transform: scale(1.08);
 }
 
 .cat h3 {
