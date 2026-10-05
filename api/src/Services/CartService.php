@@ -135,6 +135,7 @@ final class CartService
             $formatted[] = [
                 'product_id' => (int) $it['product_id'],
                 'name'       => $it['name'],
+                'image'      => $it['image'] ?? null,
                 'price'      => number_format($price, 2, '.', ''),
                 'quantity'   => $qty,
                 'subtotal'   => number_format($line, 2, '.', ''),

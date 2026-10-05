@@ -34,7 +34,7 @@ final class CartRepository
         $pdo ??= Database::connection();
         $stmt = $pdo->prepare(
             'SELECT ci.id, ci.product_id, ci.quantity,
-                    p.name, p.price, p.stock, p.active
+                    p.name, p.price, p.image, p.stock, p.active
                FROM cart_items ci
                JOIN products p ON p.id = ci.product_id
               WHERE ci.cart_id = :cid'

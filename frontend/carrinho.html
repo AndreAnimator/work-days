@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho - Billiard Dinasty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="carrinho.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header__inner">
+      <a href="index.html" class="logo">
+        <span class="logo__icon" aria-hidden="true">龍</span>
+        <span class="logo__text"><strong>Billiard <em>Dinasty</em></strong><small>Tudo para o seu jogo</small></span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a href="index.html">Início</a>
+        <a href="produtos.html">Produtos</a>
+        <a href="produtos.html?c=tacos">Tacos</a>
+        <a href="produtos.html?c=mesas">Mesas</a>
+        <a href="produtos.html?c=bolas">Bolas</a>
+        <a href="produtos.html?c=acessorios">Acessórios</a>
+        <a href="produtos.html?c=maletas">Maletas</a>
+      </nav>
+      <form class="search" id="search-form" role="search" action="produtos.html" method="get">
+        <input type="search" id="busca" name="q" placeholder="Buscar produtos pelo nome..." aria-label="Buscar produtos pelo nome" autocomplete="off">
+        <button type="submit" aria-label="Buscar">&#9906;</button>
+      </form>
+      <div class="header__actions">
+        <a href="perfil.html" class="icon-btn" aria-label="Minha conta">&#9787;</a>
+        <a href="carrinho.html" class="icon-btn cart" aria-label="Carrinho">&#128722;<span class="cart__count" id="cart-count">0</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="cart-page">
+    <section class="container cart-head">
+      <nav class="breadcrumb" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">&rsaquo;</span><span>Carrinho</span></nav>
+      <h1>Meu carrinho</h1>
+      <p>Revise seus produtos antes de finalizar a compra.</p>
+    </section>
+
+    <section class="container cart-content" aria-live="polite" aria-busy="true">
+      <div id="cart-login" class="cart-state" hidden>
+        <div class="cart-state__icon">&#128722;</div>
+        <h2>Entre na sua conta</h2>
+        <p>Para acessar seu carrinho, faça login ou crie sua conta.</p>
+        <a class="cart-primary" href="perfil.html">Entrar na minha conta</a>
+      </div>
+
+      <div id="cart-loading" class="cart-state"><h2>Carregando carrinho...</h2></div>
+
+      <div id="cart-empty" class="cart-state" hidden>
+        <div class="cart-state__icon">&#128722;</div>
+        <h2>Seu carrinho está vazio</h2>
+        <p>Escolha seus produtos favoritos e adicione-os ao carrinho.</p>
+        <a class="cart-primary" href="produtos.html">Ver produtos</a>
+      </div>
+
+      <div id="cart-error" class="cart-state" hidden>
+        <h2>Não foi possível carregar o carrinho</h2>
+        <p id="cart-error-message">Tente novamente em instantes.</p>
+        <button class="cart-primary" id="retry-cart" type="button">Tentar novamente</button>
+      </div>
+
+      <div id="cart-layout" class="cart-layout" hidden>
+        <div class="cart-items" id="cart-items"></div>
+        <aside class="cart-summary">
+          <h2>Resumo do pedido</h2>
+          <div class="summary-row"><span>Subtotal</span><strong id="cart-subtotal">R$ 0,00</strong></div>
+          <div class="summary-row"><span>Frete</span><strong>Calculado no checkout</strong></div>
+          <div class="summary-total"><span>Total</span><strong id="cart-total">R$ 0,00</strong></div>
+          <button class="cart-primary cart-checkout" type="button" disabled>Finalizar compra</button>
+          <a class="continue-shopping" href="produtos.html">Continuar comprando</a>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="beneficios">
+    <div class="container beneficios__inner">
+      <div class="beneficio"><span class="beneficio__icon">&#128666;</span><div><strong>Frete Grátis</strong><small>em compras acima de R$ 299,90</small></div></div>
+      <div class="beneficio"><span class="beneficio__icon">&#128737;</span><div><strong>Compra Segura</strong><small>seus dados protegidos</small></div></div>
+      <div class="beneficio"><span class="beneficio__icon">&#128179;</span><div><strong>Parcele em até 12x</strong><small>no cartão de crédito</small></div></div>
+      <div class="beneficio"><span class="beneficio__icon">&#127911;</span><div><strong>Suporte Especializado</strong><small>atendimento rápido e eficiente</small></div></div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="carrinho.js"></script>
+</body>
+</html>
