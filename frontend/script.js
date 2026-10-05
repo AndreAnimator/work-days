@@ -377,10 +377,10 @@ document.querySelectorAll('.cat').forEach((link) => {
   });
 });
 
-document.querySelector('.cart')?.addEventListener('click', (event) => {
-  event.preventDefault();
-  if (!localStorage.getItem('token')) openAuthModal();
-});
+// O botão do carrinho é uma navegação normal para carrinho.html.
+// A própria página do carrinho decide se deve mostrar login ou o conteúdo.
+// Não bloqueamos o clique aqui, pois este script também é carregado na home,
+// perfil e outras páginas.
 
 /* ========================= Usuário / navegação ========================= */
 function syncAdminLink(user) {
