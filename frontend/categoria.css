@@ -1,0 +1,172 @@
+/* Página de categoria — complementa o style.css */
+
+.categoria-main {
+  min-height: 60vh;
+}
+
+/* Cabeçalho da página */
+.categoria-head {
+  padding-top: 32px;
+  padding-bottom: 8px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.breadcrumb a {
+  color: var(--jade);
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.categoria-head h1 {
+  font-family: "Noto Serif SC", serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--lacquer);
+  line-height: 1.2;
+}
+
+.categoria-head__blurb {
+  margin-top: 6px;
+  max-width: 640px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Atalhos entre categorias */
+.categoria-conteudo {
+  margin-top: 22px;
+  margin-bottom: 44px;
+}
+
+.categoria-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.categoria-tabs a {
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--lacquer);
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.categoria-tabs a:hover {
+  border-color: var(--gold);
+}
+
+.categoria-tabs a[aria-current="page"] {
+  background: var(--lacquer);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.results-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Estados da lista (carregando, vazio, erro) */
+.estado-lista {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 16px;
+  background: var(--paper-2);
+  border: 1px dashed var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+}
+
+.estado-lista strong {
+  display: block;
+  font-family: "Noto Serif SC", serif;
+  font-size: 1.15rem;
+  color: var(--lacquer);
+  margin-bottom: 6px;
+}
+
+.estado-lista a {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--jade);
+  font-weight: 600;
+}
+
+.estado-lista a:hover {
+  text-decoration: underline;
+}
+
+/* Botão desabilitado (sem estoque / adicionando) */
+.produto-card__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.produto-card__estoque {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a33;
+  margin-bottom: 8px;
+}
+
+/* Aviso rápido (toast) */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 20px);
+  max-width: calc(100% - 32px);
+  background: var(--ink);
+  color: var(--paper-2);
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+  z-index: 200;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast.success {
+  border-color: #4f9a7c;
+}
+
+.toast.error {
+  border-color: #c44;
+}
+
+@media (max-width: 560px) {
+  .categoria-head h1 {
+    font-size: 1.7rem;
+  }
+}

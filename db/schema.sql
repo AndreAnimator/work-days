@@ -74,12 +74,12 @@ SELECT 'Administrador', 'admin@sinucapro.com',
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@sinucapro.com');
 
 INSERT INTO products (name, description, category, price, image, stock)
-SELECT 'Taco de madeira', 'Taco de sinuca padrão para uso recreativo e profissional.', 'Taco', 99.99,
+SELECT 'Taco de madeira', 'Taco de sinuca padrão para uso recreativo e profissional.', 'Tacos', 99.99,
        'https://images.tcdn.com.br/img/img_prod/1157245/taco_de_sinuca_garfado_2_20260202191158_e4d1f0d7c907.jpg', 20
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Taco de madeira');
 
 INSERT INTO products (name, description, category, price, image, stock)
-SELECT 'Mesa de sinuca', 'Mesa de sinuca com pano verde.', 'Mesa', 2999.99,
+SELECT 'Mesa de sinuca', 'Mesa de sinuca com pano verde.', 'Mesas', 2999.99,
        'https://acdn-us.mitiendanube.com/stores/005/809/978/products/35f18790382b6a285d60f6dc2d73d1c2-7211787dc032aa737a17416337942908-1024-1024.webp', 5
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mesa de sinuca');
 
@@ -92,3 +92,16 @@ INSERT INTO products (name, description, category, price, image, stock)
 SELECT 'Giz azul', 'Giz de sinuca azul para uso profissional.', 'Giz', 34.80,
        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_6RVlIyEnszyTGkhHPLMR8Pzju_RNuwvbKYr4MifbiA&s', 50
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Giz azul');
+
+-- Produtos de exemplo para as categorias que ainda não tinham nenhum (sem foto)
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Triângulo de madeira', 'Triângulo de madeira para organizar as bolas na abertura.', 'Triângulos', 49.90, NULL, 30
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Triângulo de madeira');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Maleta para taco', 'Maleta rígida para transportar até dois tacos.', 'Maletas', 159.90, NULL, 12
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Maleta para taco');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Luva de sinuca', 'Luva para deslizar o taco com mais suavidade.', 'Acessórios', 29.90, NULL, 40
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Luva de sinuca');

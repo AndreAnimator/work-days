@@ -1,0 +1,267 @@
+/* Catálogo de produtos — complementa o style.css */
+
+[hidden]{
+  display:none !important;
+}
+
+.categoria-main{
+  min-height:60vh;
+}
+
+/* Cabeçalho da página */
+.categoria-head{
+  padding-top:32px;
+  padding-bottom:8px;
+}
+
+.breadcrumb{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  font-size:.8rem;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+
+.breadcrumb a{
+  color:var(--jade);
+  font-weight:600;
+}
+
+.breadcrumb a:hover{
+  text-decoration:underline;
+}
+
+.categoria-head h1{
+  font-family:'Noto Serif SC',serif;
+  font-size:2.2rem;
+  font-weight:900;
+  color:var(--lacquer);
+  line-height:1.2;
+}
+
+.categoria-head__blurb{
+  margin-top:6px;
+  max-width:640px;
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+.categoria-conteudo{
+  margin-top:22px;
+  margin-bottom:44px;
+}
+
+/* Barra de filtros: categorias + ordenação */
+.catalogo-toolbar{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px 24px;
+  flex-wrap:wrap;
+  margin-bottom:28px;
+}
+
+.categoria-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.categoria-tabs a{
+  background:var(--paper-2);
+  border:1px solid var(--border);
+  border-radius:2px;
+  padding:8px 16px;
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--lacquer);
+  transition:background .2s, color .2s, border-color .2s;
+}
+
+.categoria-tabs a:hover{
+  border-color:var(--gold);
+}
+
+.categoria-tabs a[aria-current="page"]{
+  background:var(--lacquer);
+  border-color:var(--gold);
+  color:var(--gold-light);
+}
+
+.catalogo-sort{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--lacquer);
+}
+
+.catalogo-sort select{
+  font:inherit;
+  font-weight:500;
+  color:var(--text);
+  background:var(--paper-2);
+  border:1px solid var(--border);
+  border-radius:2px;
+  padding:8px 32px 8px 12px;
+  cursor:pointer;
+}
+
+.catalogo-sort select:hover,
+.catalogo-sort select:focus-visible{
+  border-color:var(--gold);
+  outline:none;
+}
+
+.results-count{
+  color:var(--muted);
+  font-size:.85rem;
+  font-weight:600;
+}
+
+/* Termo pesquisado, com atalho para limpar */
+.filtro-ativo{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:18px;
+  font-size:.9rem;
+  color:var(--muted);
+}
+
+.filtro-ativo strong{
+  color:var(--lacquer);
+}
+
+.filtro-ativo button,
+.estado-lista__acao{
+  font-size:.8rem;
+  font-weight:600;
+  color:var(--jade);
+  background:transparent;
+  border:1px solid var(--jade);
+  border-radius:2px;
+  padding:6px 12px;
+  transition:background .2s, color .2s;
+}
+
+.filtro-ativo button:hover,
+.estado-lista__acao:hover{
+  background:var(--jade);
+  color:var(--paper-2);
+}
+
+/* Estados da lista (carregando, vazio, erro) */
+.estado-lista{
+  grid-column:1 / -1;
+  text-align:center;
+  padding:48px 16px;
+  background:var(--paper-2);
+  border:1px dashed var(--border);
+  border-radius:2px;
+  color:var(--muted);
+}
+
+.estado-lista strong{
+  display:block;
+  font-family:'Noto Serif SC',serif;
+  font-size:1.15rem;
+  color:var(--lacquer);
+  margin-bottom:6px;
+}
+
+.estado-lista__acao{
+  margin-top:18px;
+  padding:9px 18px;
+  font-size:.85rem;
+}
+
+/* Produto indisponível (estoque zero) */
+.produto-card__img{
+  position:relative;
+}
+
+/* Caixa da imagem é a referência de posição do selo "Indisponível" */
+.produto-card__img{
+  position:relative;
+}
+
+.produto-card__selo{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:#a33;
+  color:#fff;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  padding:4px 9px;
+  border-radius:2px;
+}
+
+.produto-card--indisponivel .produto-card__img img{
+  filter:grayscale(1);
+  opacity:.55;
+}
+
+.produto-card--indisponivel .produto-card__preco{
+  color:var(--muted);
+}
+
+.produto-card__btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+/* Aviso rápido (toast) */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translate(-50%, 20px);
+  max-width:calc(100% - 32px);
+  background:var(--ink);
+  color:var(--paper-2);
+  border:1px solid var(--gold);
+  border-radius:2px;
+  padding:12px 20px;
+  font-size:.9rem;
+  font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s, transform .25s;
+  z-index:200;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%, 0);
+}
+
+.toast.success{
+  border-color:#4f9a7c;
+}
+
+.toast.error{
+  border-color:#c44;
+}
+
+@media(max-width:560px){
+  .categoria-head h1{
+    font-size:1.7rem;
+  }
+
+  .catalogo-sort{
+    width:100%;
+  }
+
+  .catalogo-sort select{
+    flex:1;
+  }
+}

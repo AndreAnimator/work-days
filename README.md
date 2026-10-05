@@ -36,7 +36,10 @@ O frontend pode ser aberto com Live Server (por exemplo, porta 5500) ou outro se
 
 ## Endpoints principais
 
-- `GET /api/products` — lista produtos; aceita `search` e `category`.
+- `GET /api/products` — lista os produtos **ativos**. Parâmetros opcionais:
+  - `search`: texto buscado no **nome** do produto;
+  - `category`: categoria exata (ex.: `Tacos`);
+  - `sort`: `newest` (padrão, mais recentes), `price_asc` (menor preço) ou `price_desc` (maior preço). Outro valor retorna 422.
 - `GET /api/products/{id}` — retorna um produto.
 - `POST /api/auth/register` — cria uma conta.
 - `POST /api/auth/login` — autentica.

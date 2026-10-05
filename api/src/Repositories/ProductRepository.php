@@ -8,15 +8,40 @@ use PDO;
 
 final class ProductRepository
 {
-    public function all(?string $search = null, ?string $category = null): array
-    {
+    /** Ordenações permitidas (valor aceito em ?sort= => cláusula ORDER BY). */
+    public const SORTS = [
+        'newest'     => 'created_at DESC, id DESC',
+        'price_asc'  => 'price ASC, id DESC',
+        'price_desc' => 'price DESC, id DESC',
+    ];
+
+    public const DEFAULT_SORT = 'newest';
+
+    /**
+     * Lista os produtos ATIVOS do catálogo.
+     *
+     * @param string|null $search   trecho do NOME do produto
+     * @param string|null $category categoria exata
+     * @param string      $sort     uma das chaves de self::SORTS
+     */
+    public function all(
+        ?string $search = null,
+        ?string $category = null,
+        string $sort = self::DEFAULT_SORT,
+    ): array {
         $pdo = Database::connection();
+
+        // Produtos inativos nunca aparecem no catálogo
         $conditions = ['active = 1'];
         $params = [];
 
-        if ($search !== null && $search !== '') {
-            $conditions[] = '(name LIKE :search OR description LIKE :search)';
-            $params['search'] = '%' . $search . '%';
+        $search = $search !== null ? trim($search) : '';
+        if ($search !== '') {
+            // Busca somente pelo nome. Os curingas do LIKE (% e _) digitados
+            // pelo usuário são escapados para valerem como texto comum.
+            $escaped = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $search);
+            $conditions[] = "name LIKE :search ESCAPE '!'";
+            $params['search'] = '%' . $escaped . '%';
         }
 
         if ($category !== null && $category !== '') {
@@ -24,10 +49,13 @@ final class ProductRepository
             $params['category'] = $category;
         }
 
+        // O valor de ORDER BY vem de uma lista fixa, nunca direto da requisição
+        $orderBy = self::SORTS[$sort] ?? self::SORTS[self::DEFAULT_SORT];
+
         $sql = 'SELECT id, name, description, category, price, image, stock
                   FROM products
                  WHERE ' . implode(' AND ', $conditions) . '
-                 ORDER BY id DESC';
+                 ORDER BY ' . $orderBy;
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);

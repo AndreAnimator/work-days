@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -93,116 +93,103 @@
         <a href="#destaques" class="btn btn--primary">
           Ver produtos &rarr;
         </a>
-      </div>
 
-      <button
-        class="hero__arrow hero__arrow--next"
-        aria-label="Próximo"
-        type="button"
-      >
-        &#10095;
-      </button>
+        <nav class="nav" aria-label="Principal">
+          <a href="index.html" class="active">Início</a>
+          <a href="produtos.html">Produtos</a>
+          <a href="produtos.html?c=tacos">Tacos</a>
+          <a href="produtos.html?c=mesas">Mesas</a>
+          <a href="produtos.html?c=bolas">Bolas</a>
+          <a href="produtos.html?c=acessorios">Acessórios</a>
+          <a href="produtos.html?c=maletas">Maletas</a>
+          <a href="#">Ofertas</a>
+        </nav>
 
-      <div class="hero__dots" role="tablist">
-        <button class="active" type="button" aria-label="Slide 1"></button>
-        <button type="button" aria-label="Slide 2"></button>
-        <button type="button" aria-label="Slide 3"></button>
-      </div>
-    </section>
+        <form
+          class="search"
+          id="search-form"
+          role="search"
+          action="produtos.html"
+          method="get"
+        >
+          <input
+            type="search"
+            id="busca"
+            name="q"
+            placeholder="Buscar produtos pelo nome..."
+            aria-label="Buscar produtos"
+          />
+          <button type="submit" aria-label="Buscar">&#9906;</button>
+        </form>
 
-    <!-- CATEGORIAS -->
-    <section class="container categorias" aria-label="Categorias">
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Tacos</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
+        <div class="header__actions">
+          <a
+            href="perfil.html"
+            class="icon-btn"
+            id="account-btn"
+            aria-label="Minha conta"
+          >
+            &#9787;
+          </a>
 
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Mesas</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
-
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Bolas</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
-
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Triângulos</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
-
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Giz</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
-
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Maletas</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
-
-      <a href="#" class="cat">
-        <div class="cat__img"></div>
-        <h3>Acessórios</h3>
-        <span>Ver todos &rarr;</span>
-      </a>
-    </section>
-
-    <!-- PRODUTOS -->
-    <section class="container destaques" id="destaques">
-      <div class="section-head">
-        <h2>Produtos em destaque</h2>
-        <a href="#">Ver todos os produtos &rarr;</a>
-      </div>
-
-      <div class="produtos" id="produtos"></div>
-    </section>
-
-  </main>
-
-  <!-- BENEFÍCIOS -->
-  <footer class="beneficios">
-    <div class="container beneficios__inner">
-
-      <div class="beneficio">
-        <span class="beneficio__icon" aria-hidden="true">&#128666;</span>
-        <div>
-          <strong>Frete Grátis</strong>
-          <small>em compras acima de R$ 299,90</small>
+          <a href="#" class="icon-btn cart" aria-label="Carrinho">
+            &#128722;
+            <span class="cart__count" id="cart-count">0</span>
+          </a>
         </div>
       </div>
+    </header>
 
-      <div class="beneficio">
-        <span class="beneficio__icon" aria-hidden="true">&#128737;</span>
-        <div>
-          <strong>Compra Segura</strong>
-          <small>seus dados protegidos</small>
+    <main>
+      <!-- HERO -->
+      <section class="hero" id="hero">
+        <button
+          class="hero__arrow hero__arrow--prev"
+          aria-label="Anterior"
+          type="button"
+        >
+          &#10094;
+        </button>
+
+        <div class="container hero__content">
+          <p class="hero__eyebrow">Qualidade &bull; Tradição &bull; Diversão</p>
+
+          <h1>
+            Tudo para o seu<br />
+            <span>jogo de sinuca</span>
+          </h1>
+
+          <p class="hero__text">
+            Tacos, mesas, bolas, giz, triângulos, maletas e muito mais.
+            Equipamentos de qualidade para você jogar como um profissional ou
+            apenas se divertir com os amigos.
+          </p>
+
+          <a href="produtos.html" class="btn btn--primary">
+            Ver produtos &rarr;
+          </a>
         </div>
-      </div>
 
-      <div class="beneficio">
-        <span class="beneficio__icon" aria-hidden="true">&#128179;</span>
-        <div>
-          <strong>Parcele em até 12x</strong>
-          <small>no cartão de crédito</small>
+        <button
+          class="hero__arrow hero__arrow--next"
+          aria-label="Próximo"
+          type="button"
+        >
+          &#10095;
+        </button>
+
+        <div class="hero__dots" role="tablist">
+          <button class="active" type="button" aria-label="Slide 1"></button>
+          <button type="button" aria-label="Slide 2"></button>
+          <button type="button" aria-label="Slide 3"></button>
         </div>
-      </div>
+      </section>
 
-      <div class="beneficio">
-        <span class="beneficio__icon" aria-hidden="true">&#127911;</span>
-        <div>
-          <strong>Suporte Especializado</strong>
-          <small>atendimento rápido e eficiente</small>
-        </div>
-      </div>
-
+      <!-- CATEGORIAS -->
+      <section
+        class="container categorias"
+        id="categorias"
+        aria-label="Categorias"
     </div>
   </footer>
 
@@ -224,118 +211,226 @@
         type="button"
         aria-label="Fechar"
       >
-        &times;
-      </button>
+        <a href="produtos.html?c=tacos" class="cat">
+          <div class="cat__img"></div>
+          <h3>Tacos</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
 
-      <!-- ABAS -->
-      <div class="auth-modal__tabs">
-        <button type="button" id="tab-login" class="auth-tab active">
-          Entrar
-        </button>
-        <button type="button" id="tab-register" class="auth-tab">
-          Cadastrar
-        </button>
+        <a href="produtos.html?c=mesas" class="cat">
+          <div class="cat__img"></div>
+          <h3>Mesas</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
+
+        <a href="produtos.html?c=bolas" class="cat">
+          <div class="cat__img"></div>
+          <h3>Bolas</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
+
+        <a href="produtos.html?c=triangulos" class="cat">
+          <div class="cat__img"></div>
+          <h3>Triângulos</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
+
+        <a href="produtos.html?c=giz" class="cat">
+          <div class="cat__img"></div>
+          <h3>Giz</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
+
+        <a href="produtos.html?c=maletas" class="cat">
+          <div class="cat__img"></div>
+          <h3>Maletas</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
+
+        <a href="produtos.html?c=acessorios" class="cat">
+          <div class="cat__img"></div>
+          <h3>Acessórios</h3>
+          <span>Ver todos &rarr;</span>
+        </a>
+      </section>
+
+      <!-- PRODUTOS -->
+      <section class="container destaques" id="destaques">
+        <div class="section-head">
+          <h2>Produtos em destaque</h2>
+          <a href="produtos.html">Ver todos os produtos &rarr;</a>
+        </div>
+
+        <div class="produtos" id="produtos"></div>
+      </section>
+    </main>
+
+    <!-- BENEFÍCIOS -->
+    <footer class="beneficios">
+      <div class="container beneficios__inner">
+        <div class="beneficio">
+          <span class="beneficio__icon" aria-hidden="true">&#128666;</span>
+          <div>
+            <strong>Frete Grátis</strong>
+            <small>em compras acima de R$ 299,90</small>
+          </div>
+        </div>
+
+        <div class="beneficio">
+          <span class="beneficio__icon" aria-hidden="true">&#128737;</span>
+          <div>
+            <strong>Compra Segura</strong>
+            <small>seus dados protegidos</small>
+          </div>
+        </div>
+
+        <div class="beneficio">
+          <span class="beneficio__icon" aria-hidden="true">&#128179;</span>
+          <div>
+            <strong>Parcele em até 12x</strong>
+            <small>no cartão de crédito</small>
+          </div>
+        </div>
+
+        <div class="beneficio">
+          <span class="beneficio__icon" aria-hidden="true">&#127911;</span>
+          <div>
+            <strong>Suporte Especializado</strong>
+            <small>atendimento rápido e eficiente</small>
+          </div>
+        </div>
       </div>
+    </footer>
 
-      <!-- LOGIN -->
-      <form id="login-form" class="auth-form" novalidate>
-        <h2 id="auth-title">Acessar Conta</h2>
+    <!-- ===================================================== -->
+    <!-- MODAL DE AUTENTICAÇÃO - SPA                           -->
+    <!-- ===================================================== -->
+    <div id="auth-modal" class="auth-modal hidden" aria-hidden="true">
+      <div class="auth-modal__overlay" id="auth-overlay"></div>
 
-        <div class="form-group">
-          <label for="login-email">E-mail</label>
-          <input
-            type="email"
-            id="login-email"
-            name="email"
-            placeholder="seu@email.com"
-            autocomplete="email"
-            required
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="login-password">Senha</label>
-          <input
-            type="password"
-            id="login-password"
-            name="password"
-            placeholder="Digite sua senha"
-            autocomplete="current-password"
-            required
-          >
-        </div>
-
-        <p id="login-message" class="auth-message" aria-live="polite"></p>
-
-        <button type="submit" class="btn btn--primary auth-submit">
-          Entrar
+      <div
+        class="auth-modal__content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-title"
+      >
+        <button
+          class="auth-modal__close"
+          id="close-auth-btn"
+          type="button"
+          aria-label="Fechar"
+        >
+          &times;
         </button>
-      </form>
 
-      <!-- CADASTRO -->
-      <form id="register-form" class="auth-form hidden" novalidate>
-        <h2>Criar Conta</h2>
-
-        <div class="form-group">
-          <label for="register-name">Nome Completo</label>
-          <input
-            type="text"
-            id="register-name"
-            name="name"
-            placeholder="Seu Nome"
-            autocomplete="name"
-            minlength="3"
-            required
-          >
+        <!-- ABAS -->
+        <div class="auth-modal__tabs">
+          <button type="button" id="tab-login" class="auth-tab active">
+            Entrar
+          </button>
+          <button type="button" id="tab-register" class="auth-tab">
+            Cadastrar
+          </button>
         </div>
 
-        <div class="form-group">
-          <label for="register-email">E-mail</label>
-          <input
-            type="email"
-            id="register-email"
-            name="email"
-            placeholder="seu@email.com"
-            autocomplete="email"
-            required
-          >
-        </div>
+        <!-- LOGIN -->
+        <form id="login-form" class="auth-form" novalidate>
+          <h2 id="auth-title">Acessar Conta</h2>
 
-        <div class="form-group">
-          <label for="register-password">Senha</label>
-          <input
-            type="password"
-            id="register-password"
-            name="password"
-            placeholder="Mínimo 8 caracteres"
-            autocomplete="new-password"
-            minlength="8"
-            required
-          >
-        </div>
+          <div class="form-group">
+            <label for="login-email">E-mail</label>
+            <input
+              type="email"
+              id="login-email"
+              name="email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              required
+            />
+          </div>
 
-        <div class="form-group">
-          <label for="register-password-confirmation">Confirmar Senha</label>
-          <input
-            type="password"
-            id="register-password-confirmation"
-            name="password_confirmation"
-            placeholder="Digite a senha novamente"
-            autocomplete="new-password"
-            minlength="8"
-            required
-          >
-        </div>
+          <div class="form-group">
+            <label for="login-password">Senha</label>
+            <input
+              type="password"
+              id="login-password"
+              name="password"
+              placeholder="Digite sua senha"
+              autocomplete="current-password"
+              required
+            />
+          </div>
 
-        <p id="register-message" class="auth-message" aria-live="polite"></p>
+          <p id="login-message" class="auth-message" aria-live="polite"></p>
 
-        <button type="submit" class="btn btn--primary auth-submit">
-          Cadastrar
-        </button>
-      </form>
+          <button type="submit" class="btn btn--primary auth-submit">
+            Entrar
+          </button>
+        </form>
 
+        <!-- CADASTRO -->
+        <form id="register-form" class="auth-form hidden" novalidate>
+          <h2>Criar Conta</h2>
+
+          <div class="form-group">
+            <label for="register-name">Nome Completo</label>
+            <input
+              type="text"
+              id="register-name"
+              name="name"
+              placeholder="Seu Nome"
+              autocomplete="name"
+              minlength="3"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="register-email">E-mail</label>
+            <input
+              type="email"
+              id="register-email"
+              name="email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="register-password">Senha</label>
+            <input
+              type="password"
+              id="register-password"
+              name="password"
+              placeholder="Mínimo 8 caracteres"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="register-password-confirmation">Confirmar Senha</label>
+            <input
+              type="password"
+              id="register-password-confirmation"
+              name="password_confirmation"
+              placeholder="Digite a senha novamente"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            />
+          </div>
+
+          <p id="register-message" class="auth-message" aria-live="polite"></p>
+
+          <button type="submit" class="btn btn--primary auth-submit">
+            Cadastrar
+          </button>
+        </form>
+      </div>
     </div>
-  </div>
 
   <script src="script.js"></script>
   <script src="cards.js"></script>
