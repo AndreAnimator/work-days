@@ -87,7 +87,7 @@ final class ProductRepository
             'price' => $data['price'],
             'image' => $data['image'] ?? null,
             'stock' => $data['stock'],
-            'active' => $data['active'] ?? true,
+            'active' => !empty($data['active']) ? 1 : 0,
         ]);
 
         return $this->findAdmin((int) $pdo->lastInsertId());
@@ -104,7 +104,7 @@ final class ProductRepository
         foreach ($allowed as $field) {
             if (!array_key_exists($field, $data)) continue;
             $fields[] = "{$field} = :{$field}";
-            $params[$field] = $data[$field];
+            $params[$field] = $field === 'active' ? (!empty($data[$field]) ? 1 : 0) : $data[$field];
         }
 
         if ($fields !== []) {

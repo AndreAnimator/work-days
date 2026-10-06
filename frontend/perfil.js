@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const setUser = (user) => {
     userData = user;
     localStorage.setItem('user', JSON.stringify(user));
-    if (displayName) displayName.textContent = user.name || 'Cliente';
-    if (displayRole) displayRole.textContent = user.role === 'admin' ? 'Administrador' : 'Cliente';
+    if (displayName) displayName.textContent = user.name || 'Cliente Imperial';
+    if (displayRole) displayRole.textContent = user.role === 'admin' ? 'Administrador' : 'Cliente Imperial';
     if (nameInput) nameInput.value = user.name || '';
     if (emailInput) emailInput.value = user.email || '';
   };

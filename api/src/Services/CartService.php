@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Core\Database;
@@ -11,18 +13,18 @@ final class CartService
         private CartRepository $carts = new CartRepository(),
     ) {}
 
-    /** Devolve o carrinho do usuário (criando se necessário) com itens e total. */
+    /** Devolve o carrinho persistido da conta com preços/estoque atuais do servidor. */
     public function getForUser(int $userId): array
     {
-        $cart  = $this->carts->findOrCreateForUser($userId);
+        $cart = $this->carts->findOrCreateForUser($userId);
         $items = $this->carts->items((int) $cart['id']);
 
         return $this->formatCart($cart, $items);
     }
 
     /**
-     * Adiciona N unidades ao carrinho. Se o produto já existir, SOMA
-     * a quantidade (regra "carrinho + produto é única").
+     * Adiciona N unidades ao carrinho. A quantidade existente é lida do banco
+     * e o estoque do produto é bloqueado durante toda a operação.
      */
     public function addItem(int $userId, int $productId, int $quantity): array
     {
@@ -33,42 +35,45 @@ final class CartService
         }
 
         return Database::transaction(function ($pdo) use ($userId, $productId, $quantity) {
-            $product = $this->carts->productStock($productId, $pdo);
+            $product = $this->carts->productStock($productId, $pdo, true);
 
             if (!$product || !(bool) $product['active']) {
                 throw new HttpException(404, 'Produto não encontrado ou indisponível.');
             }
-            if ((int) $product['stock'] <= 0) {
+
+            $stock = (int) $product['stock'];
+            if ($stock <= 0) {
                 throw new HttpException(422, 'Produto sem estoque.', [
                     'quantity' => ['Este produto está sem estoque.'],
                 ]);
             }
 
-            $cart      = $this->carts->findOrCreateForUser($userId, $pdo);
-            $items     = $this->carts->items((int) $cart['id'], $pdo);
-            $current   = 0;
-            foreach ($items as $it) {
-                if ((int) $it['product_id'] === $productId) {
-                    $current = (int) $it['quantity'];
+            $cart = $this->carts->findOrCreateForUser($userId, $pdo);
+            $items = $this->carts->items((int) $cart['id'], $pdo);
+            $current = 0;
+
+            foreach ($items as $item) {
+                if ((int) $item['product_id'] === $productId) {
+                    $current = (int) $item['quantity'];
                     break;
                 }
             }
 
             $desired = $current + $quantity;
-            $stock = (int) $product['stock'];
-
             if ($desired > $stock) {
                 throw new HttpException(422, 'Quantidade acima do estoque.', [
                     'quantity' => [
-                        'Só há ' . $stock . ' unidade(s) em estoque e o carrinho já possui ' . $current . '.',
+                        "Só há {$stock} unidade(s) em estoque e o carrinho já possui {$current}.",
                     ],
                 ]);
             }
 
             $this->carts->upsertItem((int) $cart['id'], $productId, $desired, $pdo);
 
-            $items = $this->carts->items((int) $cart['id'], $pdo);
-            return $this->formatCart($cart, $items);
+            return $this->formatCart(
+                $cart,
+                $this->carts->items((int) $cart['id'], $pdo)
+            );
         });
     }
 
@@ -87,22 +92,27 @@ final class CartService
             if ($quantity === 0) {
                 $this->carts->deleteItem((int) $cart['id'], $productId, $pdo);
             } else {
-                $product = $this->carts->productStock($productId, $pdo);
+                $product = $this->carts->productStock($productId, $pdo, true);
+
                 if (!$product || !(bool) $product['active']) {
                     throw new HttpException(404, 'Produto não encontrado ou indisponível.');
                 }
+
                 if ($quantity > (int) $product['stock']) {
                     throw new HttpException(422, 'Quantidade acima do estoque.', [
                         'quantity' => [
-                            'Só há ' . $product['stock'] . ' unidade(s) em estoque.',
+                            'Só há ' . (int) $product['stock'] . ' unidade(s) em estoque.',
                         ],
                     ]);
                 }
+
                 $this->carts->upsertItem((int) $cart['id'], $productId, $quantity, $pdo);
             }
 
-            $items = $this->carts->items((int) $cart['id'], $pdo);
-            return $this->formatCart($cart, $items);
+            return $this->formatCart(
+                $cart,
+                $this->carts->items((int) $cart['id'], $pdo)
+            );
         });
     }
 
@@ -112,44 +122,64 @@ final class CartService
             $cart = $this->carts->findOrCreateForUser($userId, $pdo);
             $this->carts->deleteItem((int) $cart['id'], $productId, $pdo);
 
-            $items = $this->carts->items((int) $cart['id'], $pdo);
-            return $this->formatCart($cart, $items);
+            return $this->formatCart(
+                $cart,
+                $this->carts->items((int) $cart['id'], $pdo)
+            );
         });
     }
 
     /**
-     * Formata o carrinho. Preço e total SEMPRE recalculados no servidor
-     * a partir do banco — valores enviados pelo cliente são ignorados.
+     * Todos os preços, subtotais e o total são calculados aqui, usando apenas
+     * os dados atuais do banco. Nenhum preço/total enviado pelo cliente é aceito.
      */
     private function formatCart(array $cart, array $items): array
     {
-        $subtotal = 0.0;
+        $subtotalCents = 0;
         $formatted = [];
 
-        foreach ($items as $it) {
-            $price = (float) $it['price'];
-            $qty   = (int)   $it['quantity'];
-            $line  = $price * $qty;
-            $subtotal += $line;
+        foreach ($items as $item) {
+            $priceCents = (int) round(((float) $item['price']) * 100);
+            $quantity = (int) $item['quantity'];
+            $lineCents = $priceCents * $quantity;
+            $stock = (int) $item['stock'];
+            $active = (bool) $item['active'];
+
+            $availability = 'available';
+            if (!$active) {
+                $availability = 'inactive';
+            } elseif ($stock <= 0) {
+                $availability = 'out_of_stock';
+            } elseif ($quantity > $stock) {
+                $availability = 'quantity_exceeds_stock';
+            }
+
+            $subtotalCents += $lineCents;
 
             $formatted[] = [
-                'product_id' => (int) $it['product_id'],
-                'name'       => $it['name'],
-                'image'      => $it['image'] ?? null,
-                'price'      => number_format($price, 2, '.', ''),
-                'quantity'   => $qty,
-                'subtotal'   => number_format($line, 2, '.', ''),
-                'available'  => (bool) $it['active'] && (int) $it['stock'] > 0,
-                'stock'      => (int) $it['stock'],
+                'product_id' => (int) $item['product_id'],
+                'name' => $item['name'],
+                'image' => $item['image'] ?? null,
+                'price' => $this->money($priceCents),
+                'quantity' => $quantity,
+                'subtotal' => $this->money($lineCents),
+                'available' => $availability === 'available',
+                'availability' => $availability,
+                'stock' => $stock,
             ];
         }
 
         return [
-            'cart_id'     => (int) $cart['id'],
-            'items'       => $formatted,
+            'cart_id' => (int) $cart['id'],
+            'items' => $formatted,
             'items_count' => array_sum(array_column($formatted, 'quantity')),
-            'subtotal'    => number_format($subtotal, 2, '.', ''),
-            'total'       => number_format($subtotal, 2, '.', ''),
+            'subtotal' => $this->money($subtotalCents),
+            'total' => $this->money($subtotalCents),
         ];
+    }
+
+    private function money(int $cents): string
+    {
+        return number_format($cents / 100, 2, '.', '');
     }
 }

@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS carts (
     user_id BIGINT UNSIGNED NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    -- Uma conta só pode possuir um carrinho ativo/persistente.
     UNIQUE KEY uq_carts_user (user_id),
     CONSTRAINT fk_carts_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -93,15 +94,73 @@ SELECT 'Giz azul', 'Giz de sinuca azul para uso profissional.', 'Giz', 34.80,
        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_6RVlIyEnszyTGkhHPLMR8Pzju_RNuwvbKYr4MifbiA&s', 50
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Giz azul');
 
--- Produtos de exemplo para as categorias que ainda não tinham nenhum (sem foto)
 INSERT INTO products (name, description, category, price, image, stock)
-SELECT 'Triângulo de madeira', 'Triângulo de madeira para organizar as bolas na abertura.', 'Triângulos', 49.90, NULL, 30
+SELECT 'Triângulo de madeira', 'Triângulo de madeira para organizar as bolas na abertura.', 'Triângulos', 49.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8kAHsSLkgxQaNv21tnqX-9CciB6Xi9iPTy49nbBeZaA&s=10', 30
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Triângulo de madeira');
 
 INSERT INTO products (name, description, category, price, image, stock)
-SELECT 'Maleta para taco', 'Maleta rígida para transportar até dois tacos.', 'Maletas', 159.90, NULL, 12
+SELECT 'Maleta para taco', 'Maleta rígida para transportar até dois tacos.', 'Maletas', 159.90, 'https://acdn-us.mitiendanube.com/stores/002/975/530/products/21-89c28cc7831e8a212816863371287936-640-0.webp', 12
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Maleta para taco');
 
 INSERT INTO products (name, description, category, price, image, stock)
-SELECT 'Luva de sinuca', 'Luva para deslizar o taco com mais suavidade.', 'Acessórios', 29.90, NULL, 40
+SELECT 'Luva de sinuca', 'Luva para deslizar o taco com mais suavidade.', 'Acessórios', 29.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN0vyJbHBiz-yvFLB7xxgJBMnTJtr1ip2joykGdgRu6g&s=10', 40
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Luva de sinuca');
+
+-- MESAS
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Mesa de sinuca profissional 2,70m', 'Mesa oficial com tampo em MDF, pano de lã verde e caçapas de couro.', 'Mesas', 4890.00, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuH51oRd5Ltx-SO6-EG0WPjrLlkXdgPdzitnl4TLbqRQ&s=10', 3
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mesa de sinuca profissional 2,70m');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Mesa de sinuca residencial 2,30m', 'Mesa compacta para uso em casa, com pés reforçados e acabamento em madeira.', 'Mesas', 3290.00, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6pXpkiv9nTh6jd2zMgFu27h5-aicp-wEZT3E0TeFjNQ&s=10', 5
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mesa de sinuca residencial 2,30m');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Mesa de sinuca dobrável 2,10m', 'Mesa dobrável que facilita o transporte e o armazenamento, com acessórios inclusos.', 'Mesas', 1890.00, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnRNP5aaQ8cnM4oD5CqtUCtk-dNAR9JjxDq6-ULWUMKw&s', 7
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mesa de sinuca dobrável 2,10m');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Mesa de sinuca infantil 1,50m', 'Mesa de tamanho reduzido para crianças, com 2 tacos e jogo de bolas.', 'Mesas', 790.00, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn6aa9SCQWV2CIDDmkWqjfwVssIR9B2QYbOxEhBJwPyA&s', 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mesa de sinuca infantil 1,50m');
+
+-- TACOS
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Taco de sinuca 2 partes 145cm', 'Taco de madeira maple com 2 partes, ponteira 11mm e empunhadura antiderrapante.', 'Tacos', 189.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQA_rZ_THxw2EHXuXpUSGs8Kqk3kEKuOp7LLuFOtTsVg&s', 15
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Taco de sinuca 2 partes 145cm');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Taco profissional de fibra de carbono', 'Taco leve e resistente, sem empenamento, ideal para jogadores avançados.', 'Tacos', 499.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7gOaNPWCL85sR_HqhHygFSaGd-KEMGax00dBXyQrGFA&s=10', 8
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Taco profissional de fibra de carbono');
+
+-- TRIÂNGULOS
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Triângulo de sinuca de madeira', 'Triângulo clássico de madeira para organizar as bolas no início da partida.', 'Triângulos', 49.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbAFY8Qs_eIGVx2RVOnwqhf9MhUOjBvf2cH8mbywW9TA&s', 25
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Triângulo de sinuca de madeira');
+
+
+
+-- GIZ
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Giz de sinuca verde (caixa com 12)', 'Giz verde combinando com o pano, com ótima aderência.', 'Giz', 34.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP8q5vU7wiYUnh4bgKwWmP6GIzpw_fvycB2SVNpFp1yQ&s=10', 55
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Giz de sinuca verde (caixa com 12)');
+
+
+-- MALETAS
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Maleta rígida para 2 tacos', 'Maleta com compartimentos para 2 tacos de 2 partes.', 'Maletas', 159.90, 'https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQoxInmklw8C29x7khIybG8AZHVhbP8w37Zu3j9ZlfwDyNvr2r1tFuslQHhQhv7ZP35VK7ZwCdXtE4GPHYaAE0bsvm19Mcik6WzLRueHlAZTgP20cE5-v7k&usqp=CAc', 14
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Maleta rígida para 2 tacos');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Maleta profissional para 4 tacos', 'Maleta de alta resistência com espaço para 4 tacos, giz e acessórios.', 'Maletas', 289.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkSxVBNaFWb0KhlJXCHB_luMASh-uTfRAh1oycwQN80Q&s=10', 9
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Maleta profissional para 4 tacos');
+
+
+-- ACESSÓRIOS
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Jogo de bolas de sinuca 54mm', 'Conjunto completo com 16 bolas de resina para mesa de sinuca.', 'Bolas', 249.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBgTCvKuM_jZDjxeX8Vzt-R4fiq2yGY2viZPzIOcmmVA&s=10', 12
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Jogo de bolas de sinuca 54mm');
+
+INSERT INTO products (name, description, category, price, image, stock)
+SELECT 'Ponteira de couro 11mm (kit com 5)', 'Ponteiras de reposição em couro com boa retenção de giz.', 'Acessórios', 39.90, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhtuR-f9BZNW8Bo6hBUxJkwC1cMHFzx906vhgASI-fCA&s', 35
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Ponteira de couro 11mm (kit com 5)');

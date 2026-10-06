@@ -37,3 +37,6 @@
 .cart-state .cart-primary { max-width: 280px; }
 @media (max-width: 850px) { .cart-layout { grid-template-columns: 1fr; } .cart-summary { position: static; } }
 @media (max-width: 600px) { .cart-item { grid-template-columns: 64px minmax(0,1fr); } .cart-item__image { width: 64px; height: 64px; } .cart-item__actions { grid-column: 1 / -1; justify-content: space-between; } .cart-item__subtotal { min-width: auto; } }
+.cart-item--unavailable { opacity: .78; border-color: rgba(155,60,50,.45); }
+.cart-item--unavailable .cart-item__stock { color: #9b3c32; font-weight: 700; }
+.cart-item--unavailable .cart-item__price { color: var(--muted); }

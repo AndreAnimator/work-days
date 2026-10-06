@@ -433,7 +433,7 @@ form.addEventListener('submit', async (event) => {
     priceRaw: $('f-price').value.trim(),
     stockRaw: $('f-stock').value.trim(),
     image: $('f-image').value.trim(),
-    active: $('f-active').checked,
+    active: $('f-active').checked ? 1 : 0,
   };
 
   const clientErrors = validateForm(values);
