@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS carts (
     user_id BIGINT UNSIGNED NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    -- Uma conta só pode possuir um carrinho ativo/persistente.
     UNIQUE KEY uq_carts_user (user_id),
     CONSTRAINT fk_carts_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

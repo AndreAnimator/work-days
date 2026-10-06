@@ -54,9 +54,19 @@ function renderCart(cart) {
     return;
   }
 
+  const hasUnavailableItems = cart.items.some(item => item.available !== true);
+  const checkoutButton = document.querySelector('.cart-checkout');
+  if (checkoutButton) {
+    checkoutButton.disabled = hasUnavailableItems;
+    checkoutButton.title = hasUnavailableItems
+      ? 'Remova ou ajuste os itens indisponíveis antes de finalizar.'
+      : '';
+  }
+
   cart.items.forEach(item => {
     const row = document.createElement('article');
-    row.className = 'cart-item';
+    const unavailable = item.available !== true;
+    row.className = unavailable ? 'cart-item cart-item--unavailable' : 'cart-item';
     row.dataset.productId = item.product_id;
 
     const img = document.createElement('img');
@@ -74,7 +84,14 @@ function renderCart(cart) {
     price.textContent = brl.format(Number(item.price));
     const stock = document.createElement('p');
     stock.className = 'cart-item__stock';
-    stock.textContent = item.available ? `Em estoque: ${item.stock}` : 'Produto indisponível';
+    const availability = item.availability || (item.available ? 'available' : 'out_of_stock');
+    const availabilityMessages = {
+      inactive: 'Produto indisponível (desativado)',
+      out_of_stock: 'Produto indisponível (sem estoque)',
+      quantity_exceeds_stock: `Quantidade acima do estoque disponível (${item.stock})`,
+      available: `Em estoque: ${item.stock}`,
+    };
+    stock.textContent = availabilityMessages[availability] || 'Produto indisponível';
     info.append(name, price, stock);
 
     const actions = document.createElement('div');

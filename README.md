@@ -91,3 +91,11 @@ docker compose up --build
 ```
 
 Não coloque credenciais reais no repositório. O arquivo `.env` local deve ser criado a partir de `.env.example` quando a API for executada fora do Docker.
+
+## Carrinho e estoque
+
+- Cada usuário autenticado possui no máximo um carrinho persistente; `carts.user_id` é `UNIQUE` e a criação é atômica.
+- O carrinho fica no MySQL, portanto é recuperado em novas sessões e em outros dispositivos após autenticação na mesma conta.
+- `GET /api/cart` consulta o estoque/estado atual dos produtos e sinaliza itens `inactive`, `out_of_stock` ou `quantity_exceeds_stock`.
+- Adição/alteração de quantidade valida o estoque no servidor e bloqueia a linha do produto durante a operação para evitar ultrapassar o estoque em requisições concorrentes.
+- Preço, subtotal e total são recalculados no servidor a partir do banco. O cliente não envia nem controla valores monetários.

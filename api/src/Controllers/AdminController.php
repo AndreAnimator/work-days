@@ -122,7 +122,7 @@ final class AdminController
             $normalized['stock'] = (int) $data['stock'];
         }
         if (array_key_exists('active', $data)) {
-            $normalized['active'] = (bool) $data['active'];
+            $normalized['active'] = $data['active'] === true || $data['active'] === 1 || $data['active'] === '1' ? 1 : 0;
         }
 
         return $normalized;

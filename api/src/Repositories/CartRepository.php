@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Core\Database;
@@ -6,27 +8,26 @@ use PDO;
 
 final class CartRepository
 {
-    /** Devolve o carrinho do usuário, criando se ainda não existir. */
+    /**
+     * Retorna o único carrinho da conta, criando-o de forma atômica.
+     * A chave UNIQUE carts.user_id é a garantia de integridade no banco.
+     */
     public function findOrCreateForUser(int $userId, ?PDO $pdo = null): array
     {
         $pdo ??= Database::connection();
 
-        $stmt = $pdo->prepare('SELECT * FROM carts WHERE user_id = :uid LIMIT 1');
-        $stmt->execute(['uid' => $userId]);
-        $cart = $stmt->fetch();
-        if ($cart) return $cart;
-
+        // ON DUPLICATE KEY evita corrida entre duas requisições/dispositivos
+        // do mesmo usuário tentando criar o primeiro carrinho simultaneamente.
         $stmt = $pdo->prepare(
             'INSERT INTO carts (user_id, created_at, updated_at)
-             VALUES (:uid, NOW(), NOW())'
+             VALUES (:uid, NOW(), NOW())
+             ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)'
         );
         $stmt->execute(['uid' => $userId]);
 
-        $id = (int) $pdo->lastInsertId();
-
-        $stmt = $pdo->prepare('SELECT * FROM carts WHERE id = :id');
-        $stmt->execute(['id' => $id]);
-        return $stmt->fetch();
+        $stmt = $pdo->prepare('SELECT * FROM carts WHERE user_id = :uid LIMIT 1');
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetch() ?: throw new \RuntimeException('Não foi possível obter o carrinho do usuário.');
     }
 
     public function items(int $cartId, ?PDO $pdo = null): array
@@ -37,7 +38,8 @@ final class CartRepository
                     p.name, p.price, p.image, p.stock, p.active
                FROM cart_items ci
                JOIN products p ON p.id = ci.product_id
-              WHERE ci.cart_id = :cid'
+              WHERE ci.cart_id = :cid
+              ORDER BY ci.id ASC'
         );
         $stmt->execute(['cid' => $cartId]);
         return $stmt->fetchAll();
@@ -73,13 +75,24 @@ final class CartRepository
         $stmt->execute(['cid' => $cartId, 'pid' => $productId]);
     }
 
-
-    public function productStock(int $productId, ?PDO $pdo = null): ?array
+    /**
+     * Busca o produto e, quando chamada dentro de uma transação, bloqueia a
+     * linha até o fim dela. Isso evita duas sessões ultrapassarem o estoque.
+     */
+    public function productStock(int $productId, ?PDO $pdo = null, bool $forUpdate = false): ?array
     {
         $pdo ??= Database::connection();
-        $stmt = $pdo->prepare(
-            'SELECT id, name, price, stock, active FROM products WHERE id = :id'
-        );
+        $sql =
+            'SELECT id, name, price, stock, active
+               FROM products
+              WHERE id = :id
+              LIMIT 1';
+
+        if ($forUpdate) {
+            $sql .= ' FOR UPDATE';
+        }
+
+        $stmt = $pdo->prepare($sql);
         $stmt->execute(['id' => $productId]);
         return $stmt->fetch() ?: null;
     }
