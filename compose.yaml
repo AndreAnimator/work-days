@@ -47,5 +47,23 @@ services:
     volumes:
       - ./api:/var/www/api
 
+
+  front:
+    build:
+      context: ./frontend      # Caminho para a pasta onde está o frontend
+      dockerfile: Dockerfile   # Nome do Dockerfile dentro dessa pasta
+    container_name: meu-site-frontend
+    ports:
+      - "5500:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html  # Mapeia a pasta local para hot-reload
+    restart: always
+
+
+
+
+
+
 volumes:
   mysql_data:
+

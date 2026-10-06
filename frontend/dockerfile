@@ -1,0 +1,11 @@
+# Usa a imagem leve do Nginx
+FROM nginx:alpine
+
+# Copia todos os arquivos do seu projeto para o diretório estático do Nginx
+COPY . /usr/share/nginx/html
+
+# Expõe a porta 80 do contêiner
+EXPOSE 5500
+
+# Inicia o Nginx em primeiro plano
+CMD ["nginx", "-g", "daemon off;"]
